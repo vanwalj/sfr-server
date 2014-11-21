@@ -5,7 +5,7 @@
 var express = require('express');
 var passport = require('passport');
 var models = require('../models');
-var uid = require('../uid');
+var hat = require('hat');
 
 module.exports = function (app) {
     var router = express.Router();
@@ -13,7 +13,7 @@ module.exports = function (app) {
     router.route('/token').get([
         passport.authenticate('basic', {session: false}),
         function (req, res) {
-            var token = new models.token({user: req.user.id, value: uid(128)});
+            var token = new models.token({user: req.user.id, value: hat()});
             token.save(function (err, token) {
                 if (err || !token) return res.status(500).send();
                 return res.json(token);

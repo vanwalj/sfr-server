@@ -7,8 +7,7 @@ var express = require('express'),
     configuration = require('./configuration'),
     passport = require('passport'),
     bodyParser = require('body-parser'),
-    cookieParser = require('cookie-parser'),
-    models = require('./models');
+    cookieParser = require('cookie-parser');
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));

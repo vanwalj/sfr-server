@@ -7,7 +7,7 @@ var mongoose        = require('mongoose'),
     path            = require('path'),
     configuration   = require('../configuration');
 
-mongoose.connect('mongodb://localhost/sfr');
+mongoose.connect(configuration.db.host);
 
 fs.readdirSync(__dirname).filter(function(el) {
     return path.basename(__filename) != el && el.indexOf('.js', el.length - 3) !== -1;
