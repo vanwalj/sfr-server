@@ -1,0 +1,39 @@
+/**
+ * Created by Jordan on 21/11/14.
+ */
+
+var bcrypt = require('bcryptjs'),
+    models = require('./index');
+
+module.exports = function (mongoose) {
+    var teacherSchema = mongoose.Schema({
+        login: { type: String, required: true, unique: true },
+        password: { type: String, required: true }
+    });
+
+    teacherSchema.pre('save', function(next) {
+        var teacher = this;
+        if (!teacher.isModified('password')) return next();
+        bcrypt.genSalt(10, function(err, salt) {
+            if (err) return next(err);
+            bcrypt.hash(teacher.password, salt, function(err, hash) {
+                if (err) return next(err);
+                teacher.password = hash;
+                next();
+            });
+        });
+    });
+
+    teacherSchema.methods = {
+        validPassword: function (password, cb) {
+            bcrypt.compare(password, this.password, function (err, res) {
+                cb(err, res);
+            });
+        },
+        generateToken: function (cb) {
+            models.TeacherToken.generateTokenForTeacher(this, cb);
+        }
+    };
+
+    return mongoose.model('Teacher', teacherSchema);
+};

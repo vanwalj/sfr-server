@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+- '0.10'
+services: mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: AS4ITannS2WpNYCRBliIuegOmL5JZJV/vRM9z9u0v66Hh9COZnoyYcvfuknHuSA1ZFqyItdJazFF+WscvDrObOMRMwxTtfwlByqbMoCfEODdUI9SnCHrNVWHICGxNjD7H+FiwDsjRiirV1vZ8KqLLIY8Lhi4opVjdHj/pczzDLI=
+  app: hidden-shelf-3528
+  on:
+    repo: vanwalj/sfr-server

@@ -5,18 +5,24 @@
 var mongoose        = require('mongoose'),
     fs              = require('fs'),
     path            = require('path'),
-    configuration   = require('../configuration');
+    parameters      = require('../parameters'),
+    changeCase      = require('change-case'),
+    utils           = require('../utils/utils');
 
-mongoose.connect('mongodb://localhost/sfr');
+mongoose.connect(parameters.mongodb.host, function () {
+    if (process.env.FLUSH_DB)
+        mongoose.connection.db.dropDatabase();
+});
 
-fs.readdirSync(__dirname).filter(function(el) {
-    return path.basename(__filename) != el && el.indexOf('.js', el.length - 3) !== -1;
-}).forEach(function (el) {
+fs.readdirSync(__dirname).filter(function(fileName) {
+    return path.basename(__filename) != fileName && fileName.indexOf('.js', fileName.length - 3) !== -1;
+}).forEach(function (fileName) {
     try {
-        module.exports[el.substring(0, el.indexOf('.js', el.length - 3))] = require(__dirname + '/' + el)(mongoose);
+        var name = changeCase.pascalCase(utils.fileBaseName(fileName));
+        module.exports[name] = require(__dirname + '/' + fileName)(mongoose);
     }
     catch (e) {
-        console.log('Error loading model ' + el);
+        console.log('Error loading model ' + fileName);
         console.log(e);
     }
 });

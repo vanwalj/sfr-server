@@ -2,20 +2,11 @@
  * Created by Jordan on 21/11/14.
  */
 
-var express = require('express'),
-    app = express(),
-    configuration = require('./configuration'),
-    passport = require('passport'),
-    bodyParser = require('body-parser'),
-    cookieParser = require('cookie-parser'),
-    models = require('./models');
+// Load winston custom logger.
+require('./config/winston');
 
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(passport.initialize());
-require('./passport');
+// Load passport rules.
+require('./config/passport');
 
-require('./routes')(app);
-
-app.listen(configuration.server.port);
+// Load routes.
+require('./routes');
