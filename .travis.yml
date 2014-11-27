@@ -9,3 +9,6 @@ deploy:
   app: hidden-shelf-3528
   on:
     repo: vanwalj/sfr-server
+notifications:
+  slack:
+    secure: VHXc9LgOawpzMzzjNNbpkl++jageHYh92OgrwdlSGyKivo5pAeY62d46YSR+0LfyPfE5Mdi9rX6S+zxKm9560sUPrJfbL4vvUa6/WftIuLON2aJSq4ZF0xKN2D0+X0kRXYp1w7LJQAdR7SHO9joTzbvuRGQk0Oc+3y2bB+EZ8eE=
