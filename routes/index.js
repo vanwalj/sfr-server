@@ -9,6 +9,7 @@ var fs              = require('fs'),
     shortResponses  = require('express-short-responses'),
     bodyParser      = require('body-parser'),
     express         = require('express'),
+    cors            = require('cors'),
     app             = express(),
     parameters      = require('../parameters');
 
@@ -18,7 +19,11 @@ var fs              = require('fs'),
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(cors());
 app.use(shortResponses);
+
+// CORS pre-flight
+app.use('*', cors());
 
 app.use(function (err, req, res, next) {
     winston.error(err);

@@ -20,6 +20,7 @@
     "bcryptjs": "^2.1.0",
     "body-parser": "^1.9.2",
     "change-case": "^2.1.5",
+    "cors": "^2.5.2",
     "express": "^4.10.2",
     "express-short-responses": "git+https://git@github.com/vanwalj/express-short-responses.git",
     "hat": "0.0.3",
