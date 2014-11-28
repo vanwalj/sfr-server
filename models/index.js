@@ -18,7 +18,7 @@ fs.readdirSync(__dirname).filter(function(fileName) {
     return path.basename(__filename) != fileName && fileName.indexOf('.js', fileName.length - 3) !== -1;
 }).forEach(function (fileName) {
     try {
-        var name = changeCase.pascalCase(utils.fileBaseName(fileName));
+        var name = changeCase.pascalCase(utils.fileBasename(fileName));
         module.exports[name] = require(__dirname + '/' + fileName)(mongoose);
     }
     catch (e) {

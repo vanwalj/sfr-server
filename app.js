@@ -8,5 +8,8 @@ require('./config/winston');
 // Load passport rules.
 require('./config/passport');
 
+// Load AWS parameters.
+require('./config/aws');
+
 // Load routes.
 require('./routes');

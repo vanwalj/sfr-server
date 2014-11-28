@@ -7,7 +7,10 @@ var models = require('./index');
 module.exports = function (mongoose) {
     var courseSchema = mongoose.Schema({
         login: { type: String, required: true, unique: true },
-        password: { type: String, required: true }
+        password: { type: String, required: true },
+        name: { type: String, required: true },
+        teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher' },
+        content: [ mongoose.Schema.Types.Mixed ]
     });
 
     courseSchema.pre('save', function(next) {
@@ -31,6 +34,16 @@ module.exports = function (mongoose) {
         },
         generateToken: function (cb) {
             models.CourseToken.generateTokenForCourse(this, cb);
+        },
+        mkdir: function (path, cb) {
+            var directories = path.split('/');
+            var node = this.content;
+            directories.forEach(function (directory) {
+                if (directory && directory.length) {
+                    if (node[directory] == undefined) node[directory] = [];
+                    node = node[directory];
+                }
+            });
         }
     };
 
