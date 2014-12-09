@@ -4,6 +4,8 @@
 
 var express     = require('express'),
     passport    = require('passport'),
+    parameters  = require('../parameters'),
+    AWS         = require('aws-sdk'),
     winston     = require('winston'),
     models      = require('../models');
 
@@ -38,6 +40,170 @@ module.exports = function (app) {
                 });
         }
     ]);
+
+    router.param('courseId', function (req, res, next, courseId) {
+        models.Course.find({ id: courseId }, function (err, course) {
+            if (err) return next(err);
+            if (!course) return res.shortResponses.notFound({clientError: 'course not found'});
+            req.course = course;
+            next();
+        });
+    });
+
+    router.param('fileId', function (req, res, next, fileId) {
+        models.File.find({ id: fileId }, function (err, file) {
+            if (err) return next(err);
+            if (!file) return res.shortResponses.notFound({clientError: 'file not found'});
+            req.file = file;
+            next();
+        });
+    });
+
+    router.route('/course/:courseId')
+        .delete([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var course = req.course;
+
+                if (req.user.id != course.teacher) return res.shortResponses.forbidden();
+                course.remove(function (err) {
+                    if (err) return next(err);
+                    return res.shortResponses.ok();
+                });
+            }
+        ])
+        .put([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var course = req.course;
+
+                if (req.user.id != course.teacher) return res.shortResponses.forbidden();
+
+                course.login = req.body.login || course.login;
+                course.name = req.body.name || course.name;
+                if (req.body.password) course.password = req.body.password;
+                course.save(function (err) {
+                    if (err) return next(err);
+                    return res.shortResponses.ok();
+                });
+
+
+            }
+        ]);
+
+    router.route('/course')
+        .post([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var courseName = req.body.name;
+                var courseLogin = req.body.login;
+                var coursePassword = req.body.password;
+
+                if (!courseName || !courseLogin || !coursePassword)
+                    return res.shortResponses.badRequest({clientError: 'name, login or password not specified'});
+                var course = new models.Course({
+                    login: courseLogin,
+                    name: courseName,
+                    password: coursePassword,
+                    teacher: req.user.id
+                });
+                course.save(function (err, course) {
+                    if (err) return next(err);
+                    return res.shortResponses.created({courseId: course.id});
+                });
+            }
+        ]);
+
+    router.route('/course/:courseId/mkdir')
+        .put([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var path = req.body.path;
+                var course = req.course;
+
+                if (!path) return res.shortResponses.badRequest({clientError: 'path not specified.'});
+                if (course.teacher != req.user.id) return res.shortResponses.forbidden();
+                course.mkdir(path);
+                course.save(function (err) {
+                    if (err) return next(err);
+                    return res.shortResponses.created();
+                })
+            }
+        ]);
+
+    router.route('/course/:courseId/file/:fileId')
+        .delete([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var course = req.course;
+                var file = req.file;
+
+                if (req.user.id != file.teacher != course.teacher) return res.shortResponses.forbidden();
+                course.rmFile(file);
+                course.save(function (err) {
+                    if (err) return next(err);
+                    file.remove(function (err) {
+                        if (err) return next(err);
+                        return res.shortResponses.ok();
+                    });
+                });
+            }
+        ])
+        .get([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+
+            }
+        ]);
+
+    router.route('/course/:courseId/bucket')
+        .post([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var fileName = req.body.fileName;
+                var path = req.body.path;
+                var course = req.course;
+
+                if (!fileName || !path) res.shortResponses.badRequest({clientError: 'fileName or path not specified.'});
+                if (req.user.id != course.teacher) return res.shortResponses.forbidden();
+
+                var s3 = new AWS.S3({computeChecksums: true});
+                var params = {
+                    Bucket: parameters.aws.s3Bucket,
+                    Key: fileName,
+                    Expires: 60
+                };
+                s3.getSignedUrl('putObject', params, function (err, url) {
+                    if (err) return next(err);
+                    var file = new models.File({ teacher: req.user.id, course: course.id, fileName: fileName, url: url });
+                    file.save(function (err) {
+                        if (err) return next(err);
+                        course.putFile(path);
+                        course.save(function (err) {
+                            if (err) return next(err);
+                            res.shortResponses.created({url: url, fileId: file.id});
+                        })
+                    });
+                });
+
+            }
+        ]);
+
+    router.route('/course/:courseId/file/:fileId/validate')
+        .put([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                var file = req.file;
+                var course = req.course;
+
+                if (file.teacher != course.teacher != req.user.id) return res.shortResponses.forbidden();
+                file.validate = true;
+                file.save(function (err) {
+                    if (err) return next(err);
+                    res.shortResponses.ok();
+                });
+            }
+        ]);
 
     app.use('/teacher', router);
 };

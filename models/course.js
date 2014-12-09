@@ -35,7 +35,7 @@ module.exports = function (mongoose) {
         generateToken: function (cb) {
             models.CourseToken.generateTokenForCourse(this, cb);
         },
-        mkdir: function (path, cb) {
+        mkdir: function (path) {
             var directories = path.split('/');
             var node = this.content;
             directories.forEach(function (directory) {
@@ -44,6 +44,33 @@ module.exports = function (mongoose) {
                     node = node[directory];
                 }
             });
+        },
+        putFile: function (path, file, mkdir) {
+            if (mkdir) {
+                this.mkdir(path);
+            }
+            var directories = path.split('/');
+            var node = this.content;
+            directories.forEach(function (directory) {
+                if (directory && directory.length) {
+                    if (!node[directory]) node[directory] = [];
+                    node = node[directory];
+                }
+            });
+            if (!node['files']) node['files'] = [];
+            node['files'].push(file.id);
+        },
+        rmFile: function (file) {
+            var directories = file.path.split('/');
+            var node = this.content;
+            directories.forEach(function (directory) {
+                if (directory && directory.length) {
+                    if (!node[directory]) node[directory] = [];
+                    node = node[directory];
+                }
+            });
+            var index = node['files'].indexOf(file.id);
+            if (index >= 0) delete node['files'][index];
         }
     };
 
