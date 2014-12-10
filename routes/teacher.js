@@ -181,7 +181,7 @@ module.exports = function (app) {
                         Bucket: parameters.aws.s3Bucket,
                         Key: file.id,
                         ContentType: contentType,
-                        ContentLength: 99999,
+//                        ContentLength: 99999,
                         Expires: 60
                     };
                     s3.getSignedUrl('putObject', params, function (err, url) {
