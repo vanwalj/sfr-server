@@ -19,6 +19,8 @@ var fs              = require('fs'),
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(bodyParser.raw());
+app.use(bodyParser.text());
 app.use(passport.initialize());
 app.use(cors());
 app.use(shortResponses);
