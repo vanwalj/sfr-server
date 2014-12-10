@@ -8,7 +8,8 @@ var bcrypt = require('bcryptjs'),
 module.exports = function (mongoose) {
     var teacherSchema = mongoose.Schema({
         login: { type: String, required: true, unique: true },
-        password: { type: String, required: true }
+        password: { type: String, required: true },
+        name: {type: String}
     });
 
     teacherSchema.pre('save', function(next) {

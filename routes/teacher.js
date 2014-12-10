@@ -18,7 +18,7 @@ module.exports = function (app) {
             req.user.generateToken(function (err, teacherToken) {
                 if (err) return next(err);
                 if (!teacherToken) return next(new Error('Unable to generate a teacher token.'));
-                winston.log('info', 'New teacher token !', { user: req.user, token: teacherToken });
+                winston.log('info', 'New teacher token !', { user: req.user.toJSON(), token: teacherToken.toJSON() });
                 return res.shortResponses.ok({ Bearer: teacherToken.value });
             });
         }
@@ -35,14 +35,14 @@ module.exports = function (app) {
                     if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
                     if (err) return next(err);
                     if (!teacher) return next(new Error('Unable to register a new teacher.'));
-                    winston.log('info', 'New teacher !', teacher);
+                    winston.log('info', 'New teacher !', teacher.toJSON());
                     return res.shortResponses.ok();
                 });
         }
     ]);
 
     router.param('courseId', function (req, res, next, courseId) {
-        models.Course.find({ id: courseId }, function (err, course) {
+        models.Course.findOne({ _id: courseId }, function (err, course) {
             if (err) return next(err);
             if (!course) return res.shortResponses.notFound({clientError: 'course not found'});
             req.course = course;
@@ -51,7 +51,7 @@ module.exports = function (app) {
     });
 
     router.param('fileId', function (req, res, next, fileId) {
-        models.File.find({ id: fileId }, function (err, file) {
+        models.File.findOne({ _id: fileId }, function (err, file) {
             if (err) return next(err);
             if (!file) return res.shortResponses.notFound({clientError: 'file not found'});
             req.file = file;
@@ -152,7 +152,12 @@ module.exports = function (app) {
         .get([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
-
+                var s3 = new AWS.S3();
+                var params = { Bucket: parameters.aws.s3Bucket, Key: req.file.id };
+                s3.getSignedUrl('getObject', params, function (err, url) {
+                    if (err) return next(err);
+                    res.shortResponses.ok({url: url});
+                });
             }
         ]);
 
@@ -163,28 +168,32 @@ module.exports = function (app) {
                 var fileName = req.body.fileName;
                 var path = req.body.path;
                 var course = req.course;
+                var contentType = req.body.contentType;
+                //TODO check content type
 
                 if (!fileName || !path) res.shortResponses.badRequest({clientError: 'fileName or path not specified.'});
                 if (req.user.id != course.teacher) return res.shortResponses.forbidden();
-
-                var s3 = new AWS.S3({computeChecksums: true});
-                var params = {
-                    Bucket: parameters.aws.s3Bucket,
-                    Key: fileName,
-                    Expires: 60
-                };
-                s3.getSignedUrl('putObject', params, function (err, url) {
+                var file = new models.File({ teacher: req.user.id, course: course.id, fileName: fileName, type: contentType });
+                file.save(function (err) {
                     if (err) return next(err);
-                    var file = new models.File({ teacher: req.user.id, course: course.id, fileName: fileName, url: url });
-                    file.save(function (err) {
+                    var s3 = new AWS.S3();
+                    var params = {
+                        Bucket: parameters.aws.s3Bucket,
+                        Key: file.id,
+                        ContentType: contentType,
+                        Expires: 60
+                    };
+                    s3.getSignedUrl('putObject', params, function (err, url) {
                         if (err) return next(err);
-                        course.putFile(path);
+                        course.putFile(path, file);
+                        console.log(course);
                         course.save(function (err) {
                             if (err) return next(err);
-                            res.shortResponses.created({url: url, fileId: file.id});
-                        })
+                            res.shortResponses.created({url: url});
+                        });
                     });
                 });
+
 
             }
         ]);
@@ -197,7 +206,7 @@ module.exports = function (app) {
                 var course = req.course;
 
                 if (file.teacher != course.teacher != req.user.id) return res.shortResponses.forbidden();
-                file.validate = true;
+                file.valid = true;
                 file.save(function (err) {
                     if (err) return next(err);
                     res.shortResponses.ok();

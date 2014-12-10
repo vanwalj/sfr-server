@@ -2,7 +2,8 @@
  * Created by Jordan on 26/11/14.
  */
 
-var models = require('./index');
+var models = require('./index'),
+    bcrypt = require('bcryptjs');
 
 module.exports = function (mongoose) {
     var courseSchema = mongoose.Schema({

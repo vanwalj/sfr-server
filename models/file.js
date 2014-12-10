@@ -7,9 +7,10 @@ module.exports = function (mongoose) {
         teacher: {type: mongoose.Schema.Types.ObjectId, ref: 'Teacher'},
         course: {type: mongoose.Schema.Types.ObjectId, ref: 'Course'},
         fileName: {type: String},
+        type: {type: String},
         url: {type: String},
         path: {type: String},
-        validate: {type: Boolean, default: false}
+        valid: {type: Boolean, default: false}
     });
 
     return mongoose.model('File', fileSchema);

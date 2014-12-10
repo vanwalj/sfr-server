@@ -10,8 +10,8 @@ module.exports = {
         host: process.env.MONGOLAB_URI || process.env.MONGO_DB || process.env.TRAVIS_DATABASE_URL || 'mongodb://localhost/sfr'
     },
     aws: {
-        accessKey: 'AKIAJ3S2MG2WZW4JYCCQ',
-        secretKey: '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',
+        accessKey: 'AKIAJBHVLXBAKY3RJFIQ',
+        secretKey: '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',
         s3Bucket: 'subfeed-reloaded'
     }
 };
