@@ -28,7 +28,7 @@ app.use(shortResponses);
 // CORS pre-flight
 app.use('*', cors());
 app.use(function (req, res, next) {
-    console.log(req);
+    console.log(req.body);
     next();
 });
 app.use(morgan('combined'));
