@@ -4,6 +4,7 @@
   "description": "sfr-server",
   "main": "index.js",
   "scripts": {
+    "start": "node app.js",
     "test": "node ./node_modules/mocha/bin/mocha",
     "doc": "node ./node_modules/apidoc/bin/apidoc -i routes/ -o apidoc/"
   },
