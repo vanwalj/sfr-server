@@ -4,6 +4,7 @@
 
 var express     = require('express'),
     passport    = require('passport'),
+    winston     = require('winston'),
     parameters  = require('../parameters'),
     models      = require('../models');
 
@@ -11,7 +12,28 @@ module.exports = function (app) {
     var router = express.Router();
 
 
-
+    /**
+     * @api {get} /course/token Request a course bearer token
+     * @apiVersion 0.1.0
+     * @apiName GetCourseBearerToken
+     * @apiGroup Course
+     * @apiDescription Send a bearer token, so then you can auth subsequent requests.
+     *
+     * @apiHeader {String} Authorization Course credentials with basic auth format base64(courseName + ":" + coursePassword)
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Authorization": "Basic dGVhY2hlcjp0ZWFjaGVy"
+     *     }
+     * @apiSuccess {String} Bearer The course bearer token.
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *        "Bearer": "e3d9682632881ff0a555c7a9fedda415"
+     *      }
+     *
+     * @apiError Unauthorized Wrong credentials
+     */
     router.route('/token')
         .get([
             passport.authenticate('course-basic', {session: false}),
@@ -25,6 +47,42 @@ module.exports = function (app) {
             }
         ]);
 
+    /**
+     * @api {get} /course Get the course content
+     * @apiVersion 0.1.0
+     * @apiName GetCourseContent
+     * @apiGroup Course
+     * @apiDescription Get the course name and folder/files
+     *
+     * @apiHeader {String} Authorization Bearer token
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Authorization": "Bearer e3d9682632881ff0a555c7a9fedda415"
+     *     }
+     * @apiSuccess {String} name The course name.
+     * @apiSuccess {String} content The course content.
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *        "name": "Bio",
+     *        "content": [
+     *          "report.pdf": {
+     *            "id": "e446584d32145e"
+     *          }
+     *          "assessment.docx": {
+     *            "id": "q4465x8432145q"
+     *          }
+     *          "exampleFolder": [
+     *            "demo.pdf": {
+     *              "id": "45da56546dwa"
+     *            }
+     *          ]
+     *        ]
+     *      }
+     *
+     * @apiError Unauthorized Wrong credentials
+     */
     router.route('/')
         .get([
             passport.authenticate('course-bearer', {session : false}),
@@ -45,6 +103,30 @@ module.exports = function (app) {
         });
     });
 
+    /**
+     * @api {get} /course/:fileId Get the file url
+     * @apiVersion 0.1.0
+     * @apiName GetFileUrl
+     * @apiGroup Course
+     * @apiDescription Get the file url
+     *
+     * @apiHeader {String} Authorization Bearer token
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Authorization": "Bearer e3d9682632881ff0a555c7a9fedda415"
+     *     }
+     *
+     * @apiParam {String} fileId The requested file id
+     * @apiSuccess {String} url The file url.
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *         "url": "https://subfeed-reloaded.s3.amazonaws.com/image.jpg?AWSAccessKeyId=AKIAIIMRBKA4CPS3NOMQ&Expires=1418184808&Signature=p9UplzRoDzSUZk%2B8wcHRcqMQyEQ%3D"
+     *      }
+     *
+     * @apiError Unauthorized Wrong credentials
+     */
     router.route('/:fileId')
         .get([
             passport.authenticate('course-bearer', {session : false}),

@@ -4,7 +4,8 @@
   "description": "sfr-server",
   "main": "index.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha"
+    "test": "node ./node_modules/mocha/bin/mocha",
+    "doc": "node ./node_modules/apidoc/bin/apidoc -i routes/ -o apidoc/"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "winston-slack-pls": "git+https://git@github.com/vanwalj/winston-slack-pls.git"
   },
   "devDependencies": {
+    "apidoc": "^0.9.0",
     "chai": "^1.10.0",
     "mocha": "^2.0.1",
     "request": "^2.48.0"

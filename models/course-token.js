@@ -2,6 +2,8 @@
  * Created by Jordan on 26/11/14.
  */
 
+var hat = require('hat');
+
 module.exports = function (mongoose) {
 
     var courseToken = mongoose.Schema({
@@ -12,7 +14,7 @@ module.exports = function (mongoose) {
     courseToken.statics.generateTokenForCourse = function(course, cb) {
         var CourseToken = this;
 
-        var courseToken = new CourseToken({ user: course.id, value: hat() });
+        var courseToken = new CourseToken({ course: course.id, value: hat() });
         courseToken.save(cb);
     };
 
