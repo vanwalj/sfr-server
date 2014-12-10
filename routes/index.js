@@ -9,6 +9,7 @@ var fs              = require('fs'),
     shortResponses  = require('express-short-responses'),
     bodyParser      = require('body-parser'),
     express         = require('express'),
+    morgan          = require('morgan'),
     cors            = require('cors'),
     app             = express(),
     parameters      = require('../parameters');
@@ -24,6 +25,7 @@ app.use(shortResponses);
 
 // CORS pre-flight
 app.use('*', cors());
+app.use(morgan('combined'));
 
 app.use(function (err, req, res, next) {
     winston.error(err);
