@@ -12,7 +12,7 @@ module.exports = function (app) {
 
     router.route('/confirm-upload')
         .post([
-            bodyParser.text(),
+            bodyParser.json({type: '*'}),
             function (req, res, next) {
                 winston.log('info', 'SNS Header', req.headers);
                 winston.log('info', 'Receive a notification from SNS', { content: req.body });
