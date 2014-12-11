@@ -27,23 +27,13 @@ describe('User', function () {
     describe('Register', function () {
 
         it('should throw an error since login and passwords are missing.', function (done) {
-            request.post(host + '/teacher/register', function (err, response, body) {
-                console.log(err);
-                expect(response.statusCode).to.equal(400);
-                expect(JSON.parse(body).clientError).to.equal('Missing login or password.');
-                done();
-            });
-        });
-
-        it('should throw an error since login is missing.', function (done) {
             request.post({
                 url: host + '/teacher/register',
-                form: {
-                    login: newTeacher.login
-                }
+                json: true
             }, function (err, response, body) {
+                console.log(err);
                 expect(response.statusCode).to.equal(400);
-                expect(JSON.parse(body).clientError).to.equal('Missing login or password.');
+                expect(body.clientError).to.equal('Missing login or password.');
                 done();
             });
         });
@@ -51,12 +41,27 @@ describe('User', function () {
         it('should throw an error since password is missing.', function (done) {
             request.post({
                 url: host + '/teacher/register',
-                form: {
-                    password: newTeacher.password
+                json: true,
+                body: {
+                    login: newTeacher.login
                 }
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(400);
-                expect(JSON.parse(body).clientError).to.equal('Missing login or password.');
+                expect(body.clientError).to.equal('Missing login or password.');
+                done();
+            });
+        });
+
+        it('should throw an error since login is missing.', function (done) {
+            request.post({
+                url: host + '/teacher/register',
+                body: {
+                    password: newTeacher.password
+                },
+                json: true
+            }, function (err, response, body) {
+                expect(response.statusCode).to.equal(400);
+                expect(body.clientError).to.equal('Missing login or password.');
                 done();
             });
         });
@@ -64,13 +69,14 @@ describe('User', function () {
         it('should register a new user', function (done) {
             request.post({
                 url: host + '/teacher/register',
-                form: {
+                body: {
                     login: newTeacher.login,
                     password: newTeacher.password
-                }
+                },
+                json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(200);
-                expect(JSON.parse(body).success).to.equal('OK');
+                expect(body.success).to.equal('OK');
                 done();
             });
         });
@@ -78,13 +84,14 @@ describe('User', function () {
         it('should throw an error since the login already exist.', function (done) {
             request.post({
                 url: host + '/teacher/register',
-                form: {
+                body: {
                     login: newTeacher.login,
                     password: newTeacher.password
-                }
+                },
+                json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(409);
-                expect(JSON.parse(body).clientError).to.equal('Login already exist.');
+                expect(body.clientError).to.equal('Login already exist.');
                 done();
             });
         });
