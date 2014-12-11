@@ -4,9 +4,10 @@
 
 var express     = require('express'),
     passport    = require('passport'),
-    parameters  = require('../parameters'),
     AWS         = require('aws-sdk'),
     winston     = require('winston'),
+    bodyParser  = require('body-parser'),
+    parameters  = require('../parameters'),
     models      = require('../models');
 
 module.exports = function (app) {
@@ -25,6 +26,7 @@ module.exports = function (app) {
     ]);
 
     router.route('/register').post([
+        bodyParser.json(),
         function (req, res, next) {
             if (!req.body.login || !req.body.password) {
                 winston.log('info', 'Register attempt without enough info.', req.body);
@@ -73,6 +75,7 @@ module.exports = function (app) {
             }
         ])
         .put([
+            bodyParser.json(),
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
                 var course = req.course;
@@ -93,6 +96,7 @@ module.exports = function (app) {
 
     router.route('/course')
         .post([
+            bodyParser.json(),
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
                 var courseName = req.body.name;
@@ -116,6 +120,7 @@ module.exports = function (app) {
 
     router.route('/course/:courseId/mkdir')
         .put([
+            bodyParser.json(),
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
                 var path = req.body.path;
@@ -161,19 +166,26 @@ module.exports = function (app) {
             }
         ]);
 
-    router.route('/course/:courseId/bucket')
+    router.route('/course/:courseId/file')
         .post([
+            bodyParser.json(),
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
                 var fileName = req.body.fileName;
                 var path = req.body.path;
                 var course = req.course;
                 var contentType = req.body.contentType;
+                var contentLength = req.body.contentLength;
                 //TODO check content type
 
-                if (!fileName || !path) res.shortResponses.badRequest({clientError: 'fileName or path not specified.'});
+                if (!fileName || !path || !contentType || !contentLength)
+                    res.shortResponses.badRequest({
+                        clientError: 'fileName path contentType or contentLength not specified.'
+                    });
                 if (req.user.id != course.teacher) return res.shortResponses.forbidden();
-                var file = new models.File({ teacher: req.user.id, course: course.id, fileName: fileName, type: contentType });
+                var file = new models.File({
+                    teacher: req.user.id, course: course.id, fileName: fileName, type: contentType
+                });
                 file.save(function (err) {
                     if (err) return next(err);
                     var s3 = new AWS.S3();
@@ -199,7 +211,7 @@ module.exports = function (app) {
             }
         ]);
 
-    router.route('/course/:courseId/file/:fileId/validate')
+    router.route('/course/file/validate')
         .put([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {

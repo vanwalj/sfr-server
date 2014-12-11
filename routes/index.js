@@ -7,7 +7,6 @@ var fs              = require('fs'),
     winston         = require('winston'),
     passport        = require('passport'),
     shortResponses  = require('express-short-responses'),
-    bodyParser      = require('body-parser'),
     express         = require('express'),
     morgan          = require('morgan'),
     cors            = require('cors'),
@@ -16,11 +15,7 @@ var fs              = require('fs'),
 
 
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(bodyParser.raw());
-app.use(bodyParser.text());
+// Global middleware
 app.use(passport.initialize());
 app.use(cors());
 app.use(shortResponses);
