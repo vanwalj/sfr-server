@@ -8,7 +8,7 @@ var express     = require('express'),
     models      = require('../models');
 
 module.exports = function (app) {
-    var router = express.router();
+    var router = express.Router();
 
     router.use(function (req, res, next) {
         console.log('ICI');
