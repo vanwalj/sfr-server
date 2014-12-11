@@ -10,6 +10,11 @@ var express     = require('express'),
 module.exports = function (app) {
     var router = express.router();
 
+    router.all(function (req, res, next) {
+        console.log('ICI');
+        next();
+    });
+
     router.route('/confirm-upload')
         .post([
             bodyParser.urlencoded({ extended: false }),
