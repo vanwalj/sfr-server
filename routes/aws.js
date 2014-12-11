@@ -10,16 +10,12 @@ var express     = require('express'),
 module.exports = function (app) {
     var router = express.Router();
 
-    router.use(function (req, res, next) {
-        console.log('ICI');
-        next();
-    });
-
     router.route('/confirm-upload')
         .post([
             bodyParser.text(),
             function (req, res, next) {
-                winston.log('info', 'Receive a notification from SNS', req.body);
+                winston.log('info', 'SNS Header', req.header);
+                winston.log('info', 'Receive a notification from SNS', { content: req.body });
                 res.shortResponses.ok();
             }
         ]);
