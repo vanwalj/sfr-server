@@ -89,7 +89,7 @@ module.exports = function (app) {
                     var content = [];
                     files.forEach(function (file) {
                         content.push({
-                            id: file.id,
+                            id: file._id,
                             path: file.path,
                             fileName: file.fileName,
                             type: file.type,

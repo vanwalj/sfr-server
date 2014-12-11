@@ -238,6 +238,36 @@ module.exports = function (app) {
         ]);
 
     router.route('/course/:courseId')
+    /**
+     * @api {get} /teacher/course/:courseId Get the course content
+     * @apiVersion 0.1.0
+     * @apiName GetCourseContent
+     * @apiGroup Course
+     * @apiDescription Get the course content corresponding to the given id
+     *
+     * @apiHeader {String} Authorization Bearer token
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Authorization": "Bearer e3d9682632881ff0a555c7a9fedda415"
+     *     }
+     *
+     * @apiParam {String} courseId courseId to get
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *        "name": "Bio",
+     *        "content": [
+     *          { id: '5fi4m456445adwwd', path: '/bio/s1', filename: 'week 1.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'dlk56456445adwwd', path: '/bio', filename: 'introduction.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'gfa56456445adwwd', path: '/bio/s2', filename: 'graph.jpg', type: 'image/jpeg', contentLength: 1235 },
+     *          { id: 'dbv56459945adwwd', path: '/bio/s3', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'wqa56456445adwwd', path: '/bio', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'xza56456445adwwd', path: '/bio/s1', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 }
+     *        ]
+     *      }
+     *
+     */
         .get([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
@@ -259,16 +289,33 @@ module.exports = function (app) {
                     };
                     files.forEach(function (file) {
                         response.course.content.push({
+                            id: file._id,
+                            path: file.path,
                             fileName: file.fileName,
                             type: file.type,
-                            contentLength: file.contentLength,
-                            path: file.path
+                            contentLength: file.contentLength
                         });
                     });
                     res.shortResponses.ok(response);
                 });
             }
         ])
+    /**
+     * @api {put} /teacher/course/:courseId Edit a course
+     * @apiVersion 0.1.0
+     * @apiName PutCourse
+     * @apiGroup Teacher
+     * @apiDescription Edit the course details
+     *
+     * @apiParam {String} courseId courseId to get
+     * @apiParam {String} [login] New course login
+     * @apiParam {String} [password] New course password
+     * @apiParam {String} [name] New course name
+     *
+     * @apiSuccessExample Success-Response
+     *      HTTP/1.1 200 OK
+     *
+     */
         .put([
             bodyParser.json(),
             passport.authenticate('teacher-bearer', {session: false}),
@@ -286,6 +333,19 @@ module.exports = function (app) {
                 });
             }
         ])
+    /**
+     * @api {delete} /teacher/course/:courseId Delete a course
+     * @apiVersion 0.1.0
+     * @apiName DeleteCourse
+     * @apiGroup Teacher
+     * @apiDescription Delete a course and all related files
+     *
+     * @apiParam {String} courseId courseId to delete
+     *
+     * @apiSuccessExample Success-Response
+     *      HTTP/1.1 200 OK
+     *
+     */
         .delete([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
@@ -301,6 +361,36 @@ module.exports = function (app) {
         ]);
 
     router.route('/course/:courseId/file')
+    /**
+     * @api {post} /teacher/course/:courseId/file Post a new file
+     * @apiVersion 0.1.0
+     * @apiName PostCourseFile
+     * @apiGroup Teacher
+     * @apiDescription Post a file details to get an upload url,
+     * then do a put request against this request with the file content in the request body
+     *
+     * @apiParam {String} courseId
+     * @apiParam {String} fileName file name
+     * @apiParam {String} path path where to upload
+     * @apiParam {String} ContentType file mime type
+     * @apiParam {Number} ContentLength file length
+     *
+     * @apiParamExample {json} Request-Example:
+     *      POST /teacher/course/dakjhwdjwa68786/file
+     *      {
+     *        "fileName": "report.pdf",
+     *        "path": "/week1/report/",
+     *        "ContentType": "application/pdf",
+     *        "ContentLength": 5566578
+     *      }
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *          url: "https://aws.com/file.jpg?expire=6486"
+     *      }
+     *
+     */
         .post([
             bodyParser.json(),
             passport.authenticate('teacher-bearer', {session: false}),
@@ -346,6 +436,23 @@ module.exports = function (app) {
         ]);
 
     router.route('/course/:courseId/file/:fileId')
+    /**
+     * @api {get} /teacher/course/:courseId/file/:fileId Get a file download url
+     * @apiVersion 0.1.0
+     * @apiName GetCourseFile
+     * @apiGroup Teacher
+     * @apiDescription Get the download url of a file
+     *
+     * @apiParam {String} courseId courseId to get
+     * @apiParam {String} fileId courseId to get
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *          "url": "https://aws.com/file.jpg"
+     *      }
+     *
+     */
         .get([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
@@ -359,6 +466,22 @@ module.exports = function (app) {
                 });
             }
         ])
+    /**
+     * @api {put} /teacher/course/:courseId/file/:fileId Edit a file
+     * @apiVersion 0.1.0
+     * @apiName PutCourseFile
+     * @apiGroup Teacher
+     * @apiDescription Edit the file details
+     *
+     * @apiParam {String} courseId courseId to get
+     * @apiParam {String} fileId courseId to get
+     * @apiParam {String} [fileName] new file name
+     * @apiParam {String} [path] new file path
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *
+     */
         .put([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
@@ -374,6 +497,20 @@ module.exports = function (app) {
                 });
             }
         ])
+    /**
+     * @api {delete} /teacher/course/:courseId/file/:fileId Delete a file
+     * @apiVersion 0.1.0
+     * @apiName DeleteCourseFile
+     * @apiGroup Teacher
+     * @apiDescription Delete a file
+     *
+     * @apiParam {String} courseId courseId to get
+     * @apiParam {String} fileId courseId to get
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *
+     */
         .delete([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
