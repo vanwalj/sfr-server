@@ -17,7 +17,7 @@ module.exports = function (app) {
 
     router.route('/confirm-upload')
         .post([
-            bodyParser.urlencoded({ extended: false }),
+            bodyParser.raw(),
             function (req, res, next) {
                 winston.log('info', 'Receive a notification from SNS', req.body);
                 res.shortResponses.ok();
