@@ -10,7 +10,7 @@ var express     = require('express'),
 module.exports = function (app) {
     var router = express.router();
 
-    router.all(function (req, res, next) {
+    router.use(function (req, res, next) {
         console.log('ICI');
         next();
     });
