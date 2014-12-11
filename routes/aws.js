@@ -14,7 +14,7 @@ module.exports = function (app) {
         .post([
             bodyParser.text(),
             function (req, res, next) {
-                winston.log('info', 'SNS Header', req.header);
+                winston.log('info', 'SNS Header', req.headers);
                 winston.log('info', 'Receive a notification from SNS', { content: req.body });
                 res.shortResponses.ok();
             }
