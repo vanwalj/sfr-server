@@ -15,14 +15,14 @@ module.exports = function (app) {
     /**
      * @api {get} /course/token Request a course bearer token
      * @apiVersion 0.1.0
-     * @apiName GetCourseBearerToken
+     * @apiName GetCourseToken
      * @apiGroup Course
-     * @apiDescription Send a bearer token, so then you can auth subsequent requests.
+     * @apiDescription Get a bearer token, so then you can auth subsequent requests.
      *
-     * @apiHeader {String} Authorization Course credentials with basic auth format base64(courseName + ":" + coursePassword)
+     * @apiHeader {String} Authorization basic access authentication (see: http://en.wikipedia.org/wiki/Basic_access_authentication#Client_side)
      * @apiHeaderExample {json} Header-Example:
      *     {
-     *       "Authorization": "Basic dGVhY2hlcjp0ZWFjaGVy"
+     *       "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
      *     }
      * @apiSuccess {String} Bearer The course bearer token.
      *
@@ -67,17 +67,12 @@ module.exports = function (app) {
      *      {
      *        "name": "Bio",
      *        "content": [
-     *          "report.pdf": {
-     *            "id": "e446584d32145e"
-     *          }
-     *          "assessment.docx": {
-     *            "id": "q4465x8432145q"
-     *          }
-     *          "exampleFolder": [
-     *            "demo.pdf": {
-     *              "id": "45da56546dwa"
-     *            }
-     *          ]
+     *          { id: '5fi4m456445adwwd', path: '/bio/s1', filename: 'week 1.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'dlk56456445adwwd', path: '/bio', filename: 'introduction.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'gfa56456445adwwd', path: '/bio/s2', filename: 'graph.jpg', type: 'image/jpeg', contentLength: 1235 },
+     *          { id: 'dbv56459945adwwd', path: '/bio/s3', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'wqa56456445adwwd', path: '/bio', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { id: 'xza56456445adwwd', path: '/bio/s1', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 }
      *        ]
      *      }
      *
@@ -87,15 +82,30 @@ module.exports = function (app) {
         .get([
             passport.authenticate('course-bearer', {session : false}),
             function (req, res, next) {
-                res.shortResponses.ok({
-                    name: req.user.name,
-                    content: req.user.content
+                models.File.find({
+                    course: req.user.id,
+                    valid: true
+                }, function (err, files) {
+                    var content = [];
+                    files.forEach(function (file) {
+                        content.push({
+                            id: file.id,
+                            path: file.path,
+                            fileName: file.fileName,
+                            type: file.type,
+                            contentLength: file.contentLength
+                        });
+                    });
+                    res.shortResponses.ok({
+                        name: req.user.name,
+                        content: content
+                    });
                 });
             }
         ]);
 
     router.param('fileId', function (req, res, next, fileId) {
-        models.File.findOne({ _id: fileId }, function (err, file) {
+        models.File.findOne({ _id: fileId, valid: true }, function (err, file) {
             if (err) return next(err);
             if (!file) return res.shortResponses.notFound({clientError: 'file not found'});
             req.file = file;

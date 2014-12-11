@@ -9,21 +9,25 @@ var express     = require('express'),
 module.exports = function (app) {
     var router = express.Router();
 
+
+    /**
+     * This call is private and should never be called directly, since this is a AWS http hook
+     * Called every time a file is uploaded
+     */
     router.route('/confirm-upload')
         .post([
             bodyParser.text(),
             function (req, res, next) {
                 try {
                     req.body = JSON.parse(req.body);
-                    next();
                 } catch (e) {
-                    res.shortResponses.badRequest();
                     winston.error(e);
+                    return res.shortResponses.badRequest();
                 }
+                next();
             },
             function (req, res, next) {
-                winston.log('info', 'SNS Header', req.headers);
-                winston.log('info', 'Receive a notification from SNS', { content: req.body });
+                winston.log('info', 'Receive a notification from SNS', req.body);
                 res.shortResponses.ok();
             }
         ]);

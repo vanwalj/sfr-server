@@ -25,6 +25,14 @@ module.exports = function (mongoose) {
         });
     });
 
+    teacherSchema.post('remove', function (teacher) {
+        models.Course.remove({
+            teacher: teacher._id
+        }, function (err) {
+            if (err) return winston.error('Error removing courses', err);
+        });
+    });
+
     teacherSchema.methods = {
         validPassword: function (password, cb) {
             bcrypt.compare(password, this.password, function (err, res) {

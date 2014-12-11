@@ -9,10 +9,14 @@ var passport = require('passport'),
 
 passport.use('teacher-bearer', new BearerStrategy(
     function (bearer, done) {
-        models.TeacherToken.findOne({value: bearer}, function (err, teacherToken) {
+        models.TeacherToken.findOne({
+            value: bearer
+        }, function (err, teacherToken) {
             if (err) return done(err);
             if (!teacherToken) return done(null, false);
-            models.Teacher.find(teacherToken.user, function (err, teacher) {
+            models.Teacher.findOne({
+                _id: teacherToken.teacher
+            }, function (err, teacher) {
                 if (err) return done(err);
                 if (!teacher) return done(null, false);
                 return done(null, teacher, { scope: 'all' });
@@ -23,7 +27,9 @@ passport.use('teacher-bearer', new BearerStrategy(
 
 passport.use('teacher-basic', new BasicStrategy(
     function (login, password, done) {
-        models.Teacher.findOne({login: login}, function (err, teacher) {
+        models.Teacher.findOne({
+            login: login
+        }, function (err, teacher) {
             if (err) return done(err);
             if (!teacher) return done(null, false);
             teacher.validPassword(password, function (err, login) {
@@ -37,10 +43,14 @@ passport.use('teacher-basic', new BasicStrategy(
 
 passport.use('course-bearer', new BearerStrategy(
     function (bearer, done) {
-        models.CourseToken.findOne({value: bearer}, function (err, courseToken) {
+        models.CourseToken.findOne({
+            value: bearer
+        }, function (err, courseToken) {
             if (err) return done(err);
             if (!courseToken) return done(null, false);
-            models.Course.find(courseToken.user, function (err, course) {
+            models.Course.findOne({
+                _id: courseToken.course
+            }, function (err, course) {
                 if (err) return done(err);
                 if (!course) return done(null, false);
                 return done(null, course, { scope: 'all' });
@@ -51,7 +61,9 @@ passport.use('course-bearer', new BearerStrategy(
 
 passport.use('course-basic', new BasicStrategy(
     function (login, password, done) {
-        models.Course.findOne({login: login}, function (err, course) {
+        models.Course.findOne({
+            login: login
+        }, function (err, course) {
             if (err) return done(err);
             if (!course) return done(null, false);
             course.validPassword(password, function (err, login) {

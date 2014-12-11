@@ -13,8 +13,6 @@ var fs              = require('fs'),
     app             = express(),
     parameters      = require('../parameters');
 
-
-
 // Global middleware
 app.use(passport.initialize());
 app.use(cors());
