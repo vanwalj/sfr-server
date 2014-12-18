@@ -54,16 +54,17 @@ module.exports = function (app) {
                 winston.log('info', 'Register attempt without enough info.', req.body);
                 return res.shortResponses.badRequest({ clientError: "Missing login or password." });
             }
-            new models.Teacher({
+            var teacher = new models.Teacher({
                 login: req.body.login,
                 password: req.body.password
-            }).save(function (err, teacher) {
-                    if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
-                    if (err) return next(err);
-                    if (!teacher) return next(new Error('Unable to register a new teacher.'));
-                    winston.log('info', 'New teacher !', teacher.toJSON());
-                    return res.shortResponses.ok();
-                });
+            });
+            teacher.save(function (err, teacher) {
+                if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
+                if (err) return next(err);
+                if (!teacher) return next(new Error('Unable to register a new teacher.'));
+                winston.log('info', 'New teacher !', teacher.toJSON());
+                return res.shortResponses.ok();
+            });
         }
     ])
     /**
@@ -89,8 +90,8 @@ module.exports = function (app) {
                 req.user.remove(function (err, teacher) {
                     if (err) return next(err);
                     winston.log('info', 'Teacher account deleted', teacher);
-                    res.shortResponses.ok();
-                });
+                    //res.shortRespon
+                })
             }
         ]);
 

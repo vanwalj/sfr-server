@@ -27,14 +27,27 @@ var route   = '/teacher';
 
 describe('Teacher', function () {
 
-    var newTeacher = {
-        login: 'john@gmail.com',
-        password: '123123'
-    };
 
     describe('Register', function () {
 
+        var newTeacher = {
+            login: 'john@gmail.com',
+            password: '123123'
+        };
+
         var url = host + route + '/';
+
+        after(function (done) {
+            request.del({
+                url: url,
+                auth: {
+                    user: newTeacher.login,
+                    pass: newTeacher.password
+                }
+            }, function () {
+                done();
+            });
+        });
 
         it('should throw an error since login and passwords are missing.', function (done) {
             request.post({
@@ -106,9 +119,70 @@ describe('Teacher', function () {
         });
 
     });
+
+    describe('Delete', function () {
+        var url = host + route + '/';
+
+        var newTeacher = {
+            login: 'john@gmail.com',
+            password: '123123'
+        };
+
+        before(function (done) {
+            request.post({
+                url: url,
+                body: newTeacher,
+                json: true
+            }, function () {
+                done();
+            })
+        });
+
+        it('should delete the account', function (done) {
+            request.del({
+                url: url,
+                auth: {
+                    user: newTeacher.login,
+                    pass: newTeacher.password
+                },
+                json: true
+            }, function (err, res, body) {
+                expect(res.statusCode).to.equal(200);
+                done();
+            });
+        });
+
+    });
+
     describe('Login', function () {
 
         var url = host + route + '/token';
+        var newTeacher = {
+            login: 'john@gmail.com',
+            password: '123123'
+        };
+
+        before(function (done) {
+            request.post({
+                url: host + route + '/',
+                body: newTeacher,
+                json: true
+            }, function () {
+                done();
+            });
+        });
+
+        after(function (done) {
+            request.del({
+                url: host + route + '/',
+                auth: {
+                    user: newTeacher.login,
+                    pass: newTeacher.password
+                }
+            }, function () {
+                done();
+            })
+        });
 
         it('should throw an error since the connections info are missing', function (done) {
             request.get({
@@ -164,18 +238,41 @@ describe('Teacher', function () {
             password: 'bio'
         };
 
+        var newTeacher = {
+            login: 'john@gmail.com',
+            password: '123123'
+        };
+
         before(function (done) {
-            request.get({
-                url: bearerUrl,
-                json: true,
+            request.post({
+                url: host + route + '/',
+                body: newTeacher,
+                json: true
+            }, function () {
+                request.get({
+                    url: bearerUrl,
+                    json: true,
+                    auth: {
+                        user: newTeacher.login,
+                        pass: newTeacher.password
+                    }
+                }, function (err, response, body) {
+                    bearerToken = body.Bearer;
+                    done();
+                });
+            });
+        });
+
+        after(function (done) {
+            request.del({
+                url: host + route + '/',
                 auth: {
                     user: newTeacher.login,
                     pass: newTeacher.password
                 }
-            }, function (err, response, body) {
-                bearerToken = body.Bearer;
+            }, function () {
                 done();
-            });
+            })
         });
 
         it('should throw an error since bearer token is not specified', function (done) {
