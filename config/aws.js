@@ -7,5 +7,6 @@ var AWS = require('aws-sdk'),
 
 AWS.config.update({
     accessKeyId: parameters.aws.accessKey,
-    secretAccessKey: parameters.aws.secretKey
+    secretAccessKey: parameters.aws.secretKey,
+    region: 'eu-west-1'
 });

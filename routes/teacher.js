@@ -7,6 +7,9 @@ var express     = require('express'),
     AWS         = require('aws-sdk'),
     winston     = require('winston'),
     bodyParser  = require('body-parser'),
+    _           = require('lodash'),
+    sns         = new AWS.SNS(),
+    s3          = new AWS.S3(),
     parameters  = require('../parameters'),
     models      = require('../models');
 
@@ -66,7 +69,7 @@ module.exports = function (app) {
                     return res.shortResponses.ok();
                 });
             }
-    ])
+        ])
     /**
      * @api {delete} /teacher Delete a teacher account
      * @apiVersion 0.1.0
@@ -117,16 +120,16 @@ module.exports = function (app) {
      *
      */
         .get([
-        passport.authenticate('teacher-basic', {session: false}),
-        function (req, res, next) {
-            req.user.generateToken(function (err, teacherToken) {
-                if (err) return next(err);
-                if (!teacherToken) return next(new Error('Unable to generate a teacher token.'));
-                winston.log('info', 'New teacher token !', { user: req.user.toJSON(), token: teacherToken.toJSON() });
-                return res.shortResponses.ok({ Bearer: teacherToken.value });
-            });
-        }
-    ])
+            passport.authenticate('teacher-basic', {session: false}),
+            function (req, res, next) {
+                req.user.generateToken(function (err, teacherToken) {
+                    if (err) return next(err);
+                    if (!teacherToken) return next(new Error('Unable to generate a teacher token.'));
+                    winston.log('info', 'New teacher token !', { user: req.user.toJSON(), token: teacherToken.toJSON() });
+                    return res.shortResponses.ok({ Bearer: teacherToken.value });
+                });
+            }
+        ])
     /**
      * @api {delete} /teacher/token Delete a teacher bearer token
      * @apiVersion 0.1.0
@@ -183,16 +186,27 @@ module.exports = function (app) {
                 if (!req.body.name || !req.body.login || !req.body.password)
                     return res.shortResponses.badRequest({clientError: 'name, login or password not specified'});
 
-                new models.Course({
+                var course = new models.Course({
                     login: req.body.login,
                     name: req.body.name,
                     password: req.body.password,
                     teacher: req.user._id
-                }).save(function (err, course) {
-                    if (err && err.code == 11000) return res.shortResponses.conflict();
-                    if (err) return next(err);
-                    return res.shortResponses.created({courseId: course.id});
                 });
+
+                sns.createTopic({
+                   Name: course.id
+                }, function (err, data) {
+                    if (err) return next(err);
+                    course.snsArn = data.TopicArn;
+                    course.save(function (err) {
+                        if (err) sns.deleteTopic({ TopicArn: course.snsArn }, function (snsErr, data) {
+                            if (err && err.code == 11000) return res.shortResponses.conflict();
+                            if (err) return next(err);
+                        });
+                        else return res.shortResponses.created({ courseId: course.id });
+                    });
+                });
+
             }
         ])
     /**
@@ -354,9 +368,11 @@ module.exports = function (app) {
                 next();
             },
             function (req, res, next) {
-                req.course.remove(function (err) {
-                    if (err) return next(err);
-                    return res.shortResponses.ok();
+                sns.deleteTopic({ TopicArn: req.course.snsArn }, function () {
+                    req.course.remove(function (err) {
+                        if (err) return next(err);
+                        return res.shortResponses.ok();
+                    });
                 });
             }
         ]);
@@ -404,11 +420,18 @@ module.exports = function (app) {
                 var path = req.body.path;
                 var contentType = req.body.contentType;
                 var contentLength = req.body.contentLength;
-                //TODO check content type
 
                 if (!fileName || !path || !contentType || !contentLength)
                     return res.shortResponses.badRequest({
                         clientError: 'fileName, path, contentType or contentLength not specified.'
+                    });
+                if (contentLength > parameters.fileUpload.maxSize)
+                    return res.shortResponses.badRequest({
+                        clientError: 'File to large.'
+                    });
+                if (!_.contains(parameters.fileUpload.types, contentType))
+                    return res.shortResponses.badRequest({
+                        clientError: 'File type not allowed.'
                     });
                 new models.File({
                     teacher: req.user.id,
@@ -419,7 +442,6 @@ module.exports = function (app) {
                     path: path
                 }).save(function (err, file) {
                         if (err) return next(err);
-                        var s3 = new AWS.S3();
                         s3.getSignedUrl('putObject', {
                             Bucket: parameters.aws.s3Bucket,
                             Key: file.id,
@@ -457,8 +479,7 @@ module.exports = function (app) {
         .get([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
-                var S3 = new AWS.S3();
-                S3.getSignedUrl('getObject', {
+                s3.getSignedUrl('getObject', {
                     Bucket: parameters.aws.s3Bucket,
                     Key: req.file.id
                 }, function (err, url) {

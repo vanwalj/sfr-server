@@ -13,5 +13,11 @@ module.exports = {
         accessKey: 'AKIAJBHVLXBAKY3RJFIQ',
         secretKey: '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',
         s3Bucket: 'subfeed-reloaded'
+    },
+    fileUpload: {
+        maxSize: 100000,
+        types: [
+            "img/jpg"
+        ]
     }
 };

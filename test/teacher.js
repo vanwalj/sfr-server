@@ -17,7 +17,7 @@ process.env.PORT = 4545;
 process.env.WINSTON_LVL = winston.level = 'no';
 process.env.MONGO_DB = 'mongodb://localhost/mocha';
 process.env.FLUSH_DB = true;
-process.env.NODE_ENV = 'mocha';
+process.env.NODE_ENV = 'mocha-dg';
 
 // Launch the app
 require('../app');
@@ -237,6 +237,7 @@ describe('Teacher', function () {
             login: 'bio',
             password: 'bio'
         };
+        var courseId = null;
 
         var newTeacher = {
             login: 'john@gmail.com',
@@ -265,10 +266,9 @@ describe('Teacher', function () {
 
         after(function (done) {
             request.del({
-                url: host + route + '/',
+                url: url + '/' + courseId,
                 auth: {
-                    user: newTeacher.login,
-                    pass: newTeacher.password
+                    bearer: bearerToken
                 }
             }, function () {
                 done();
@@ -310,6 +310,7 @@ describe('Teacher', function () {
             }, function (err, res, body) {
                 expect(res.statusCode).to.equal(201);
                 expect(body.courseId).to.have.length(24);
+                courseId = body.courseId;
                 done();
             });
         });
