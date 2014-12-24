@@ -48,24 +48,24 @@ module.exports = function (app) {
      *
      */
         .post([
-        bodyParser.json(),
-        function (req, res, next) {
-            if (!req.body.login || !req.body.password) {
-                winston.log('info', 'Register attempt without enough info.', req.body);
-                return res.shortResponses.badRequest({ clientError: "Missing login or password." });
+            bodyParser.json(),
+            function (req, res, next) {
+                if (!req.body.login || !req.body.password) {
+                    winston.log('info', 'Register attempt without enough info.', req.body);
+                    return res.shortResponses.badRequest({ clientError: "Missing login or password." });
+                }
+                var teacher = new models.Teacher({
+                    login: req.body.login,
+                    password: req.body.password
+                });
+                teacher.save(function (err, teacher) {
+                    if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
+                    if (err) return next(err);
+                    if (!teacher) return next(new Error('Unable to register a new teacher.'));
+                    winston.log('info', 'New teacher !', teacher.toJSON());
+                    return res.shortResponses.ok();
+                });
             }
-            var teacher = new models.Teacher({
-                login: req.body.login,
-                password: req.body.password
-            });
-            teacher.save(function (err, teacher) {
-                if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
-                if (err) return next(err);
-                if (!teacher) return next(new Error('Unable to register a new teacher.'));
-                winston.log('info', 'New teacher !', teacher.toJSON());
-                return res.shortResponses.ok();
-            });
-        }
     ])
     /**
      * @api {delete} /teacher Delete a teacher account
@@ -90,7 +90,7 @@ module.exports = function (app) {
                 req.user.remove(function (err, teacher) {
                     if (err) return next(err);
                     winston.log('info', 'Teacher account deleted', teacher);
-                    //res.shortRespon
+                    res.shortResponses.ok();
                 })
             }
         ]);
@@ -199,7 +199,7 @@ module.exports = function (app) {
      * @api {get} /teacher/course Get the course list
      * @apiVersion 0.1.0
      * @apiName GetCourseList
-     * @apiGroup Course
+     * @apiGroup Teacher
      * @apiDescription Get the course list
      *
      * @apiHeader {String} Authorization Bearer token
@@ -243,7 +243,7 @@ module.exports = function (app) {
      * @api {get} /teacher/course/:courseId Get the course content
      * @apiVersion 0.1.0
      * @apiName GetCourseContent
-     * @apiGroup Course
+     * @apiGroup Teacher
      * @apiDescription Get the course content corresponding to the given id
      *
      * @apiHeader {String} Authorization Bearer token

@@ -17,7 +17,7 @@ process.env.PORT = 4545;
 process.env.WINSTON_LVL = winston.level = 'no';
 process.env.MONGO_DB = 'mongodb://localhost/mocha';
 process.env.FLUSH_DB = true;
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'mocha';
 
 // Launch the app
 require('../app');
@@ -44,7 +44,7 @@ describe('Teacher', function () {
                     user: newTeacher.login,
                     pass: newTeacher.password
                 }
-            }, function () {
+            }, function (err, response, body) {
                 done();
             });
         });

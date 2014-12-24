@@ -21,7 +21,9 @@ app.use(shortResponses);
 // CORS pre-flight
 app.use('*', cors());
 
-app.use(morgan('combined'));
+if (process.env.NODE_ENV != 'mocha') {
+    app.use(morgan('combined'));
+}
 
 app.use(function (err, req, res, next) {
     winston.error(err);

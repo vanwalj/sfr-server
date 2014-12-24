@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
-    "test": "node ./node_modules/mocha/bin/mocha",
+    "test": "node ./node_modules/mocha/bin/mocha -b",
     "doc": "node ./node_modules/apidoc/bin/apidoc -i routes/ -o apidoc/"
   },
   "repository": {
