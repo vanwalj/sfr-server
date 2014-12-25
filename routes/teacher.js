@@ -189,6 +189,7 @@ module.exports = function (app) {
             passport.authenticate('teacher-bearer', {session: false}),
             bodyParser.json(),
             function (req, res, next) {
+                winston.log('info', 'CHIBRE');
                 if (!req.body.name || !req.body.login || !req.body.password)
                     return res.shortResponses.badRequest( {clientError: 'name, login or password not specified'} );
 
@@ -198,10 +199,12 @@ module.exports = function (app) {
                     password: req.body.password,
                     teacher: req.user._id
                 });
+                winston.log('info', 'QUEUE');
 
                 sns.createTopic({
                    Name: course.id
                 }, function (err, data) {
+                    winston.log('info', 'FOUTRE');
                     if (err) return next(err);
                     course.snsArn = data.TopicArn;
                     course.save(function (err) {
