@@ -187,7 +187,13 @@ module.exports = function (app) {
                 next();
             },
             passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                winston.log('info', 'BODY');
+            },
             bodyParser.json(),
+            function (req, res, next) {
+                winston.log('info', 'PARSER');
+            },
             function (req, res, next) {
                 winston.log('info', 'CHIBRE');
                 if (!req.body.name || !req.body.login || !req.body.password)
