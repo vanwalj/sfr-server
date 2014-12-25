@@ -236,7 +236,7 @@ module.exports = function (app) {
         .get([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
-                models.course.find({
+                models.Course.find({
                     teacher: req.user.id
                 }, function (err, courses) {
                     if (err) return next(err);
