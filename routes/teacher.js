@@ -180,6 +180,10 @@ module.exports = function (app) {
      *
      */
         .post([
+            function (req, res, next) {
+                winston.log('info', req.header);
+                next();
+            },
             passport.authenticate('teacher-bearer', {session: false}),
             bodyParser.json(),
             function (req, res, next) {
