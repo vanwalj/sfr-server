@@ -244,7 +244,8 @@ module.exports = function (app) {
                     courses.forEach(function (course) {
                         content.push({
                             id: course._id,
-                            name: course.name
+                            name: course.name,
+                            login: course.login
                         });
                     });
                     res.shortResponses.ok({ content: content });
