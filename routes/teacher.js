@@ -181,7 +181,9 @@ module.exports = function (app) {
      */
         .post([
             function (req, res, next) {
-                winston.log('info', req.header);
+                if (req.headers){
+                    winston.log('info', req.headers);
+                }
                 next();
             },
             passport.authenticate('teacher-bearer', {session: false}),
