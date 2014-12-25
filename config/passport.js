@@ -5,23 +5,19 @@
 var passport = require('passport'),
     BearerStrategy = require('passport-http-bearer'),
     BasicStrategy = require('passport-http').BasicStrategy,
-    models = require('./../models/index'),
-    Winston = require('winston');
+    models = require('./../models/index');
 
 passport.use('teacher-bearer', new BearerStrategy(
     function (bearer, done) {
-        Winston.log('info', 'zero', bearer);
 
         models.TeacherToken.findOne({
             value: bearer
         }, function (err, teacherToken) {
-            Winston.log('info', 'one', teacherToken);
             if (err) return done(err);
             if (!teacherToken) return done(null, false);
             models.Teacher.findOne({
                 _id: teacherToken.teacher
             }, function (err, teacher) {
-                Winston.log('info', 'two', teacher);
                 if (err) return done(err);
                 if (!teacher) return done(null, false);
                 return done(null, teacher, { scope: 'all' });

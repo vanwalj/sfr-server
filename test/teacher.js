@@ -309,6 +309,7 @@ describe('Teacher', function () {
         });
 
         it('should throw an error since a course with the same name already exist', function (done) {
+            this.timeout(7000);
             request.post({
                 url: url,
                 json: true,
