@@ -184,7 +184,7 @@ module.exports = function (app) {
             bodyParser.json(),
             function (req, res, next) {
                 if (!req.body.name || !req.body.login || !req.body.password)
-                    return res.shortResponses.badRequest({clientError: 'name, login or password not specified'});
+                    return res.shortResponses.badRequest( {clientError: 'name, login or password not specified'} );
 
                 var course = new models.Course({
                     login: req.body.login,
@@ -484,6 +484,7 @@ module.exports = function (app) {
                     Key: req.file.id
                 }, function (err, url) {
                     if (err) return next(err);
+                    winston.log('info', 'File download URL created.', url);
                     res.shortResponses.ok({ url: url });
                 });
             }
@@ -515,6 +516,7 @@ module.exports = function (app) {
                 req.file.path       = req.body.path     || req.file.path;
                 req.file.save(function (err) {
                     if (err) return next(err);
+                    winston.log('info', 'File edited.', req.file);
                     res.shortResponses.ok();
                 });
             }
@@ -542,6 +544,7 @@ module.exports = function (app) {
             function (req, res, next) {
                 req.file.remove(function (err) {
                     if (err) return next(err);
+                    winston.log('info', 'File deleted.', req.file);
                     return res.shortResponses.ok();
                 });
             }
