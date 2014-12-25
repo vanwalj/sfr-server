@@ -55,7 +55,6 @@ describe('Teacher', function () {
                 json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(400);
-                expect(body.clientError).to.equal('Missing login or password.');
                 done();
             });
         });
@@ -69,7 +68,6 @@ describe('Teacher', function () {
                 }
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(400);
-                expect(body.clientError).to.equal('Missing login or password.');
                 done();
             });
         });
@@ -83,7 +81,6 @@ describe('Teacher', function () {
                 json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(400);
-                expect(body.clientError).to.equal('Missing login or password.');
                 done();
             });
         });
@@ -98,7 +95,6 @@ describe('Teacher', function () {
                 json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(200);
-                expect(body.success).to.equal('OK');
                 done();
             });
         });
@@ -113,7 +109,6 @@ describe('Teacher', function () {
                 json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(409);
-                expect(body.clientError).to.equal('Login already exist.');
                 done();
             });
         });
@@ -190,7 +185,6 @@ describe('Teacher', function () {
                 json: true
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(401);
-                expect(body).to.equal('Unauthorized');
                 done();
             });
         });
@@ -205,7 +199,6 @@ describe('Teacher', function () {
                 }
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(401);
-                expect(body).to.equal('Unauthorized');
                 done();
             });
         });
@@ -220,6 +213,7 @@ describe('Teacher', function () {
                 }
             }, function (err, response, body) {
                 expect(response.statusCode).to.equal(200);
+                console.log(body);
                 expect(body.Bearer).to.have.length(32);
                 done();
             });
@@ -281,7 +275,6 @@ describe('Teacher', function () {
                 json: true
             }, function (err, res, body) {
                 expect(res.statusCode).to.equal(401);
-                expect(body).to.equal('Unauthorized');
                 done();
             });
         });
