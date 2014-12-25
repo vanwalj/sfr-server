@@ -189,10 +189,12 @@ module.exports = function (app) {
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
                 winston.log('info', 'BODY');
+                next();
             },
             bodyParser.json(),
             function (req, res, next) {
                 winston.log('info', 'PARSER');
+                next();
             },
             function (req, res, next) {
                 winston.log('info', 'CHIBRE');
