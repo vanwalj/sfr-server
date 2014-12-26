@@ -27,7 +27,7 @@ module.exports = function (app) {
                 next();
             },
             function (req, res, next) {
-                winston.log('info', 'Receive a notification from SNS', req.body);
+                winston.log('info', 'Receive a notification from SNS', JSON.parse(req.body.Message).Records[0].s3.object.key);
                 res.shortResponses.ok();
             }
         ]);
