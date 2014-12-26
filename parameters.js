@@ -17,7 +17,8 @@ module.exports = {
     fileUpload: {
         maxSize: 100000,
         types: [
-            "img/jpg"
+            "image/jpeg", "image/png", "image/tiff", "image/gif",
+            "application/pdf"
         ]
     }
 };

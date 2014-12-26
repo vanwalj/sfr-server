@@ -419,12 +419,12 @@ module.exports = function (app) {
             function (req, res, next) {
                 var fileName = req.body.fileName;
                 var path = req.body.path;
-                var contentType = req.body.contentType;
-                var contentLength = req.body.contentLength;
+                var contentType = req.body.ContentType;
+                var contentLength = req.body.ContentLength;
 
                 if (!fileName || !path || !contentType || !contentLength)
                     return res.shortResponses.badRequest({
-                        clientError: 'fileName, path, contentType or contentLength not specified.'
+                        clientError: 'fileName, path, ContentType or ContentLength not specified.'
                     });
                 if (contentLength > parameters.fileUpload.maxSize)
                     return res.shortResponses.badRequest({
