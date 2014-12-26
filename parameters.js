@@ -15,7 +15,7 @@ module.exports = {
         s3Bucket: 'subfeed-reloaded'
     },
     fileUpload: {
-        maxSize: 100000,
+        maxSize: 9999999999999,
         types: [
             "image/jpeg", "image/png", "image/tiff", "image/gif",
             "application/pdf"
