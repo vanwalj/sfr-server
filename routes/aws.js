@@ -4,6 +4,7 @@
 
 var express     = require('express'),
     bodyParser  = require('body-parser'),
+    models      = require('../models'),
     winston     = require('winston');
 
 module.exports = function (app) {
@@ -27,8 +28,20 @@ module.exports = function (app) {
                 next();
             },
             function (req, res, next) {
-                winston.log('info', 'Receive a notification from SNS', JSON.parse(req.body.Message).Records[0].s3.object.key);
-                res.shortResponses.ok();
+                var objectKey;
+                try {
+                    objectKey = JSON.parse(req.body.Message).Records[0].s3.object.key;
+                    winston.log('info', 'Receive a notification from SNS for object.', objectKey);
+                    models.File.findOne({ _id: objectKey }, function (err, file) {
+                        if (err || !file) return res.shortResponses.notFound();
+                        file.valid = true;
+                        file.save();
+                        return res.shortResponses.ok();
+                    });
+                } catch (e) {
+                    winston.error(e);
+                    return res.shortResponses.badRequest();
+                }
             }
         ]);
 
