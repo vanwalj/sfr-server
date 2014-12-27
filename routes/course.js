@@ -94,7 +94,8 @@ module.exports = function (app) {
                             path: file.path,
                             fileName: file.fileName,
                             type: file.type,
-                            contentLength: file.contentLength
+                            contentLength: file.contentLength,
+                            createdAt: file.createdAt
                         });
                     });
                     res.shortResponses.ok({

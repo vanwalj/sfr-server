@@ -16,7 +16,8 @@ module.exports = function (mongoose) {
         comment: { type: String },
         contentLength: { type: Number, required: true},
         path: {type: String, required: true},
-        valid: {type: Boolean, default: false, required: true}
+        valid: {type: Boolean, default: false, required: true},
+        createdAt: { type: Date, default: Date.now, required: true }
     });
 
     fileSchema.post('remove', function (file) {
