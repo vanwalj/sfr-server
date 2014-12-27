@@ -8,7 +8,6 @@ var express     = require('express'),
     winston     = require('winston'),
     bodyParser  = require('body-parser'),
     _           = require('lodash'),
-    sns         = new AWS.SNS(),
     s3          = new AWS.S3(),
     parameters  = require('../parameters'),
     models      = require('../models');
@@ -193,18 +192,10 @@ module.exports = function (app) {
                     teacher: req.user._id
                 });
 
-                sns.createTopic({
-                   Name: course.id
-                }, function (err, data) {
+                course.save(function (err) {
+                    if (err && err.code == 11000) return res.shortResponses.conflict();
                     if (err) return next(err);
-                    course.snsArn = data.TopicArn;
-                    course.save(function (err) {
-                        if (err) sns.deleteTopic({ TopicArn: course.snsArn }, function (snsErr, data) {
-                            if (err && err.code == 11000) return res.shortResponses.conflict();
-                            if (err) return next(err);
-                        });
-                        else return res.shortResponses.created({ courseId: course.id });
-                    });
+                    return res.shortResponses.created({ courseId: course.id });
                 });
 
             }
@@ -369,11 +360,9 @@ module.exports = function (app) {
                 next();
             },
             function (req, res, next) {
-                sns.deleteTopic({ TopicArn: req.course.snsArn }, function () {
-                    req.course.remove(function (err) {
-                        if (err) return next(err);
-                        return res.shortResponses.ok();
-                    });
+                req.course.remove(function (err) {
+                    if (err) return next(err);
+                    return res.shortResponses.ok();
                 });
             }
         ]);
@@ -392,6 +381,8 @@ module.exports = function (app) {
      * @apiParam {String} path path where to upload
      * @apiParam {String} ContentType file mime type
      * @apiParam {Number} ContentLength file length
+     * @apiParam {Boolean} [published] file state
+     * @apiParam {String} [comment] file comment
      *
      * @apiParamExample {json} Request-Example:
      *      POST /teacher/course/dakjhwdjwa68786/file
@@ -421,6 +412,7 @@ module.exports = function (app) {
                 var path = req.body.path;
                 var contentType = req.body.ContentType;
                 var contentLength = req.body.ContentLength;
+                var published = req.body.published || false;
 
                 if (!fileName || !path || !contentType || !contentLength)
                     return res.shortResponses.badRequest({
@@ -440,7 +432,9 @@ module.exports = function (app) {
                     fileName: fileName,
                     type: contentType,
                     contentLength: contentLength,
-                    path: path
+                    comment: req.body.comment,
+                    path: path,
+                    published: published
                 }).save(function (err, file) {
                         if (err) return next(err);
                         s3.getSignedUrl('putObject', {
@@ -501,6 +495,8 @@ module.exports = function (app) {
      * @apiParam {String} fileId courseId to get
      * @apiParam {String} [fileName] new file name
      * @apiParam {String} [path] new file path
+     * @apiParam {String} [comment] file comment
+     * @apiParam {Boolean} [published] file state
      *
      * @apiSuccessExample Success-Response:
      *      HTTP/1.1 200 OK
@@ -513,12 +509,19 @@ module.exports = function (app) {
                 next();
             },
             function (req, res, next) {
-                req.file.fileName   = req.body.fileName || req.file.fileName;
-                req.file.path       = req.body.path     || req.file.path;
+
+                var notify = req.body.published == true && req.file.published == false;
+
+                req.file.fileName   = req.body.fileName     || req.file.fileName;
+                req.file.path       = req.body.path         || req.file.path;
+                req.file.published  = req.body.published    || req.file.published;
+                req.file.comment    = req.body.comment      || req.file.comment;
+
                 req.file.save(function (err) {
                     if (err) return next(err);
                     winston.log('info', 'File edited.', req.file);
                     res.shortResponses.ok();
+                    //if (notify)
                 });
             }
         ])

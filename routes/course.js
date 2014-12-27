@@ -84,7 +84,8 @@ module.exports = function (app) {
             function (req, res, next) {
                 models.File.find({
                     course: req.user.id,
-                    valid: true
+                    valid: true,
+                    published: true
                 }, function (err, files) {
                     var content = [];
                     files.forEach(function (file) {
@@ -105,7 +106,7 @@ module.exports = function (app) {
         ]);
 
     router.param('fileId', function (req, res, next, fileId) {
-        models.File.findOne({ _id: fileId, valid: true }, function (err, file) {
+        models.File.findOne({ _id: fileId, valid: true, published: true }, function (err, file) {
             if (err) return next(err);
             if (!file) return res.shortResponses.notFound({clientError: 'file not found'});
             req.file = file;

@@ -12,8 +12,7 @@ module.exports = function (mongoose) {
         login: { type: String, required: true, unique: true },
         password: { type: String, required: true },
         name: { type: String, required: true },
-        teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true },
-        snsArn: { type: String, required: true }
+        teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true }
     });
 
     courseSchema.pre('save', function(next) {

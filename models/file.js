@@ -12,6 +12,8 @@ module.exports = function (mongoose) {
         course: {type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true},
         fileName: {type: String, required: true},
         type: {type: String, required: true},
+        published: { type: Boolean, required: true, default: false },
+        comment: { type: String },
         contentLength: { type: Number, required: true},
         path: {type: String, required: true},
         valid: {type: Boolean, default: false, required: true}
