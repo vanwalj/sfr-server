@@ -15,8 +15,8 @@ if (process.env.NODE_ENV == "production") {
     });
 }
 
-setInterval(2000, function () {
+setInterval(function () {
     winston.log('info', 'Interval');
-});
+}, 2000);
 
 //Add more logger
