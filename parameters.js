@@ -9,6 +9,9 @@ module.exports = {
     mongodb: {
         host: process.env.MONGOLAB_URI || process.env.MONGO_DB || process.env.TRAVIS_DATABASE_URL || 'mongodb://localhost/sfr'
     },
+    amqp: {
+        url: process.env.CLOUDAMQP_URL || 'amqp://sxhsvvvi:VeSx2CUwh83u8TLfzMjkPUuY6HfDoYbg@bunny.cloudamqp.com/sxhsvvvi'
+    },
     aws: {
         accessKey: 'AKIAJBHVLXBAKY3RJFIQ',
         secretKey: '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',
