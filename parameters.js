@@ -19,7 +19,9 @@ module.exports = {
         types: [
             "image/jpeg", "image/png", "image/tiff", "image/gif",
             "application/pdf",
-            "audio/x-m4r"
+            "audio/x-m4r", "audio/mp3",
+            "text/plain",
+            "video/mp4"
         ]
     }
 };
