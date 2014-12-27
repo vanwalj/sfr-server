@@ -9,7 +9,10 @@ module.exports = function (mongoose) {
     var teacherSchema = mongoose.Schema({
         login: { type: String, required: true, unique: true },
         password: { type: String, required: true },
-        name: {type: String}
+        firstName: { type: String },
+        lastName: { type: String },
+        title: { type: String },
+        picture: { type: Buffer }
     });
 
     teacherSchema.pre('save', function(next) {

@@ -44,6 +44,10 @@ module.exports = function (app) {
      *
      * @apiParam {String} login New teacher login
      * @apiParam {String} password New teacher password
+     * @apiParam {String} [firstName]
+     * @apiParam {String} [lastName]
+     * @apiParam {String} [title]
+     * @apiParam {Buffer} [picture]
      *
      * @apiSuccessExample Success-Response
      *      HTTP/1.1 200 OK
@@ -58,7 +62,11 @@ module.exports = function (app) {
                 }
                 var teacher = new models.Teacher({
                     login: req.body.login,
-                    password: req.body.password
+                    password: req.body.password,
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    title: req.body.title,
+                    picture: req.body.picture
                 });
                 teacher.save(function (err, teacher) {
                     if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
@@ -94,6 +102,42 @@ module.exports = function (app) {
                     winston.log('info', 'Teacher account deleted', teacher);
                     res.shortResponses.ok();
                 })
+            }
+        ])
+    /**
+     * @api {get} /teacher Get teacher account details
+     * @apiVersion 0.1.0
+     * @apiName GetTeacher
+     * @apiGroup Teacher
+     * @apiDescription Get the teacher account infos
+     *
+     * @apiHeader {String} Authorization Bearer token
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Authorization": "Bearer e3d9682632881ff0a555c7a9fedda415"
+     *     }
+     *
+     * @apiSuccessExample Success-Response
+     *      HTTP/1.1 200 OK
+     *      {
+     *          "login": "teacher@school.kent.ac.uk",
+     *          "firstName": "Teacher",
+     *          "lastName": "TEACHER",
+     *          "title": "Dr.",
+     *          "picture": "base64 image"
+     *      }
+     *
+     */
+        .get([
+            passport.authenticate('teacher-bearer', {session: false}),
+            function (req, res, next) {
+                res.shortResponses.ok({
+                    login: req.user.login,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    title: req.user.title,
+                    picture: req.user.picture
+                });
             }
         ]);
 
@@ -512,8 +556,6 @@ module.exports = function (app) {
             },
             function (req, res, next) {
 
-                var notify = req.body.published == true && req.file.published == false;
-
                 req.file.fileName   = req.body.fileName     || req.file.fileName;
                 req.file.path       = req.body.path         || req.file.path;
                 req.file.published  = req.body.published    || req.file.published;
@@ -523,7 +565,6 @@ module.exports = function (app) {
                     if (err) return next(err);
                     winston.log('info', 'File edited.', req.file);
                     res.shortResponses.ok();
-                    //if (notify)
                 });
             }
         ])

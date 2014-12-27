@@ -26,6 +26,7 @@ module.exports = function (mongoose) {
         if (file.isModified('published')) {
             if (file.published == true) {
                 file.publishedAt = Date.now;
+                // TODO notifications
             } else {
                 file.publishedAt = undefined;
             }
