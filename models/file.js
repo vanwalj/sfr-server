@@ -17,7 +17,20 @@ module.exports = function (mongoose) {
         contentLength: { type: Number, required: true},
         path: {type: String, required: true},
         valid: {type: Boolean, default: false, required: true},
-        createdAt: { type: Date, default: Date.now, required: true }
+        createdAt: { type: Date, default: Date.now, required: true },
+        publishedAt: { type: Date }
+    });
+
+    fileSchema.pre('save', function(next) {
+        var file = this;
+        if (file.isModified('published')) {
+            if (file.published == true) {
+                file.publishedAt = Date.now;
+            } else {
+                file.publishedAt = undefined;
+            }
+        }
+        next();
     });
 
     fileSchema.post('remove', function (file) {

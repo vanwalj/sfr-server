@@ -95,7 +95,7 @@ module.exports = function (app) {
                             fileName: file.fileName,
                             type: file.type,
                             contentLength: file.contentLength,
-                            createdAt: file.createdAt
+                            publishedAt: file.publishedAt
                         });
                     });
                     res.shortResponses.ok({
