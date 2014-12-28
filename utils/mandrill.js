@@ -10,7 +10,7 @@ var mandrillClient = new mandrill.Mandrill(parameters.mandrill.apiKey);
 
 var sender = {
     lostPassword: function (email, name, resetUrl) {
-        var templateName = "lost-password",
+        var templateSlug = "lost-password",
             message = {
                 to: [{
                     email: email,
@@ -32,7 +32,7 @@ var sender = {
             };
 
         mandrillClient.messages.sendTemplate({
-            templateName: templateName,
+            templateSlug: templateSlug,
             message: message
         }, function (res) {
             winston.log('info', 'Reset email send', res);
