@@ -491,7 +491,7 @@ module.exports = function (app) {
                             Expires: 60
                         }, function (err, url) {
                             if (err) return next(err);
-                            res.shortResponses.created({url: url});
+                            res.shortResponses.created({ url: url, id: file.id });
                         });
                     });
 
