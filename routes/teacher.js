@@ -615,7 +615,6 @@ module.exports = function (app) {
      */
         .post([
             bodyParser.json(),
-            bodyParser.urlencoded({ extended: false }),
             function (req, res, next) {
                 var login = req.body.login;
 
@@ -629,7 +628,40 @@ module.exports = function (app) {
                     res.shortResponses.ok();
                 });
             }
+        ])
+    /**
+     * @api {put} /teacher/reset-password Put a reset password token
+     * @apiVersion 0.1.0
+     * @apiName PutResetPassword
+     * @apiGroup Teacher
+     * @apiDescription Put a reset password token
+     *
+     * @apiParam {String} token Reset password token
+     * @apiParam {String} password New password
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *
+     */
+        .put([
+            bodyParser.json(),
+            function (req, res, next) {
+                var token = req.body.token;
+                var password = req.body.password;
+
+                if (!token || !password) return res.shortResponses.badRequest({ clientError: 'Missing token or password.' });
+                models.Teacher.findOne({ resetToken: token }, function(err, teacher) {
+                    if (err) return next(err);
+                    if (!teacher) return res.shortResponses.notFound({ clientError: 'No such login.' });
+                    teacher.password = password;
+                    teacher.save(function (err) {
+                        if (err) return next(err);
+                        res.shortResponses.ok();
+                    });
+                });
+            }
         ]);
+
 
     app.use('/teacher', router);
 };
