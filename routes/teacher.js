@@ -442,7 +442,8 @@ module.exports = function (app) {
      * @apiSuccessExample Success-Response:
      *      HTTP/1.1 200 OK
      *      {
-     *          url: "https://aws.com/file.jpg?expire=6486"
+     *          url: "https://aws.com/file.jpg?expire=6486",
+     *          id: "jdawhdo21q31iopdklaw"
      *      }
      *
      */
