@@ -98,6 +98,7 @@ module.exports = function (app) {
                         });
                     });
                     res.shortResponses.ok({
+                        id: req.user.id,
                         name: req.user.name,
                         content: content
                     });
