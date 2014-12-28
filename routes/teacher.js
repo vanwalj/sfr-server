@@ -624,7 +624,7 @@ module.exports = function (app) {
                     if (err) return next(err);
                     if (!teacher) return res.shortResponses.notFound({ clientError: 'No such login.' });
                     teacher.generateResetToken();
-                    mandrill.lostPassword(teacher.login, teacher.fullName, teacher.resetToken);
+                    mandrill.lostPassword(teacher.login, teacher.fullName, teacher.resetUrl);
                     teacher.save();
                     res.shortResponses.ok();
                 });

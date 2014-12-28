@@ -2,9 +2,10 @@
  * Created by Jordan on 21/11/14.
  */
 
-var bcrypt = require('bcryptjs'),
-    hat    = require('hat'),
-    models = require('./index');
+var bcrypt      = require('bcryptjs'),
+    hat         = require('hat'),
+    parameters  = require('../parameters'),
+    models      = require('./index');
 
 module.exports = function (mongoose) {
     var teacherSchema = mongoose.Schema({
@@ -18,7 +19,16 @@ module.exports = function (mongoose) {
     });
 
     teacherSchema.virtual('fullName').get(function () {
-        return this.title + " " + this.firstName + " " + this.lastName;
+        var fullName = "";
+        if (this.title) fullName += this.title + " ";
+        if (this.firstName) fullName += this.firstName + " ";
+        if (this.lastName) fullName += this.lastName;
+        if (fullName.length > 0 && fullName[fullName.length - 1] == " ") fullName = fullName.substring(0, fullName.length - 1);
+        return fullName;
+    });
+
+    teacherSchema.virtual('resetUrl').get(function () {
+        return parameters.lostPassword.resetUrl + this.resetToken;
     });
 
     teacherSchema.pre('save', function(next) {

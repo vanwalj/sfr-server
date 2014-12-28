@@ -4,7 +4,8 @@
 
 module.exports = {
     server: {
-        port: process.env.PORT || 7070
+        port: process.env.PORT || 7070,
+        url: process.env.SERVER_URL
     },
     mandrill: {
         apiKey: process.env.MANDRILL_APIKEY,
@@ -27,5 +28,8 @@ module.exports = {
             "text/plain",
             "video/mp4"
         ]
+    },
+    lostPassword: {
+        resetUrl: 'http://google.fr/'
     }
 };
