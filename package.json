@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/vanwalj/sfr-server",
   "dependencies": {
+    "apn": "^1.6.2",
     "aws-sdk": "^2.0.29",
     "bcryptjs": "^2.1.0",
     "body-parser": "^1.9.2",
@@ -30,6 +31,7 @@
     "mandrill-api": "^1.0.41",
     "mongoose": "^3.8.19",
     "morgan": "^1.5.0",
+    "node-gcm": "^0.9.12",
     "passport": "^0.2.1",
     "passport-http": "^0.2.2",
     "passport-http-bearer": "^1.0.1",

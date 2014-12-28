@@ -36,6 +36,9 @@ module.exports = {
         apn: {
             key: '',
             cert: ''
+        },
+        gcm: {
+            key: ''
         }
     }
 };

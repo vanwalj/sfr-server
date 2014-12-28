@@ -4,6 +4,7 @@
 
 var AWS         = require('aws-sdk'),
     winston     = require('winston'),
+    notifications = require('../utils/notifications'),
     parameters  = require('../parameters');
 
 module.exports = function (mongoose) {
@@ -26,7 +27,7 @@ module.exports = function (mongoose) {
         if (file.isModified('published')) {
             if (file.published == true) {
                 file.publishedAt = Date.now;
-                // TODO notifications
+                notifications.filePublished(file);
             } else {
                 file.publishedAt = undefined;
             }
