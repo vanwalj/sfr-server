@@ -64,9 +64,9 @@ var sender = {
             template_content: [],
             message: message
         }, function (res) {
-            winston.log('info', 'Reset email send', res);
+            winston.log('info', 'Self download email send.', res);
         }, function (err) {
-            winston.error('Reset email sending error', err);
+            winston.error('Self download email sending error.', err);
         });
     }
 

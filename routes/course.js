@@ -242,5 +242,15 @@ module.exports = function (app) {
             }
         ]);
 
+    router.route('/notifications')
+        .post([
+            passport.authenticate('course-bearer', {session : false}),
+            bodyParser.json(),
+            function (req, res, next) {
+                if (!req.body.deviceToken || !req.body.platform) return res.shortResponses.badRequest({ clientError: "Missing deviceToken or platform" });
+
+            }
+        ]);
+
     app.use('/course', router);
 };
