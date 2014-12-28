@@ -33,6 +33,7 @@ var sender = {
 
         mandrillClient.messages.sendTemplate({
             template_name: templateSlug,
+            template_content: [],
             message: message
         }, function (res) {
             winston.log('info', 'Reset email send', res);
