@@ -615,6 +615,7 @@ module.exports = function (app) {
      */
         .post([
             bodyParser.json(),
+            bodyParser.urlencoded({ extended: false }),
             function (req, res, next) {
                 var login = req.body.login;
 
