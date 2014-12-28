@@ -5,7 +5,10 @@
 var express     = require('express'),
     passport    = require('passport'),
     winston     = require('winston'),
+    bodyParser  = require('body-parser'),
+    s3          = new AWS.S3(),
     parameters  = require('../parameters'),
+    mandrill    = require('../utils/mandrill'),
     models      = require('../models');
 
 module.exports = function (app) {
@@ -143,13 +146,99 @@ module.exports = function (app) {
         .get([
             passport.authenticate('course-bearer', {session : false}),
             function (req, res, next) {
-                if (req.file.course != req.user.id) return next (err);
-                var s3 = new AWS.S3();
+                if (req.file.course != req.user.id) return res.shortResponses.unauthorized();
                 var params = { Bucket: parameters.aws.s3Bucket, Key: req.file.id };
                 s3.getSignedUrl('getObject', params, function (err, url) {
                     if (err) return next(err);
                     res.shortResponses.ok({url: url});
                 });
+            }
+        ]);
+
+    router.route('/self-mail/:fileId')
+    /**
+     * @api {post} /course/self-mail/:fileId Post a self mail request
+     * @apiVersion 0.1.0
+     * @apiName PostSelfMailRequest
+     * @apiGroup Course
+     * @apiDescription Post a request to receive a mail containing a download Url
+     *
+     * @apiHeader {String} Authorization Bearer token
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Authorization": "Bearer e3d9682632881ff0a555c7a9fedda415"
+     *     }
+     *
+     * @apiParam {String} fileId The requested file id
+     * @apiParam {String} email The user email
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     */
+        .post([
+            passport.authenticate('course-bearer', {session : false}),
+            bodyParser.json(),
+            function (req, res, next) {
+                if (req.file.course != req.user.id) return res.shortResponses.unauthorized();
+
+                var email = req.body.email;
+                if (!email) return res.shortResponses.badRequest({ 'clientError': 'Missing email.' });
+                new models.DownloadToken({ file: req.file.id })
+                    .save(function (err, downloadToken) {
+                        if (err) return next(err);
+                        mandrill.selfDownloadEmail(email, downloadToken.downloadUrl);
+                        res.shortResponses.ok();
+                    });
+            }
+        ]);
+
+    router.route('/self-mail')
+    /**
+     * @api {post} /course/self-mail Post a download token
+     * @apiVersion 0.1.0
+     * @apiName PostDownloadToken
+     * @apiGroup Course
+     * @apiDescription Post a download token to get a download Url
+     *
+     * @apiParam {String} token The download token
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *      HTTP/1.1 200 OK
+     *      {
+     *         "url": "https://subfeed-reloaded.s3.amazonaws.com/image.jpg?AWSAccessKeyId=AKIAIIMRBKA4CPS3NOMQ&Expires=1418184808&Signature=p9UplzRoDzSUZk%2B8wcHRcqMQyEQ%3D"
+     *      }
+     *
+     */
+        .post([
+            bodyParser.json(),
+            function (req, res, next) {
+                if (!req.body.token) return res.shortResponses.badRequest({ clientError: 'Missing token.' });
+
+                models.DownloadToken.findOne({ value: req.body.token }, function (err, downloadToken) {
+                    if (err) return next(err);
+                    if (!downloadToken) return res.shortResponses.badRequest({ clientError: "No such token." });
+                    if (downloadToken.valid == false) return res.shortResponses.badRequest({ 'clientError': 'Download link expired.' });
+                    downloadToken.valid = false;
+                    downloadToken.save(function (err) {
+                        if (err) return next(err);
+                        models.File.findOne({
+                            valid: true,
+                            published: true
+                        }, function (err, file) {
+                            if (err) return next(err);
+                            if (!file) res.shortResponses.badRequest( {clientError: 'File not available.'} );
+                            var params = { Bucket: parameters.aws.s3Bucket, Key: file.id };
+                            s3.getSignedUrl('getObject', params, function (err, url) {
+                                if (err) return next(err);
+                                res.shortResponses.ok({url: url});
+                            });
+
+                        });
+                    });
+
+                });
+
             }
         ]);
 
