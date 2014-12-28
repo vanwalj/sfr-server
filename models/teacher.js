@@ -3,6 +3,7 @@
  */
 
 var bcrypt = require('bcryptjs'),
+    hat    = require('hat'),
     models = require('./index');
 
 module.exports = function (mongoose) {
@@ -12,7 +13,12 @@ module.exports = function (mongoose) {
         firstName: { type: String },
         lastName: { type: String },
         title: { type: String },
-        picture: { type: Buffer }
+        picture: { type: Buffer },
+        resetToken: { type: String }
+    });
+
+    teacherSchema.virtual('fullName').get(function () {
+        return this.title + " " + this.firstName + " " + this.lastName;
     });
 
     teacherSchema.pre('save', function(next) {
@@ -44,6 +50,9 @@ module.exports = function (mongoose) {
         },
         generateToken: function (cb) {
             models.TeacherToken.generateTokenForTeacher(this, cb);
+        },
+        generateResetToken: function () {
+            this.resetToken = hat();
         }
     };
 

@@ -10,6 +10,7 @@ var express     = require('express'),
     _           = require('lodash'),
     s3          = new AWS.S3(),
     parameters  = require('../parameters'),
+    mandrill    = require('../utils/mandrill'),
     models      = require('../models');
 
 module.exports = function (app) {
@@ -594,6 +595,37 @@ module.exports = function (app) {
                     if (err) return next(err);
                     winston.log('info', 'File deleted.', req.file);
                     return res.shortResponses.ok();
+                });
+            }
+        ]);
+
+    router.route('/reset-password')
+    /**
+     * @api {post} /teacher/reset-password Post a reset password request
+     * @apiVersion 0.1.0
+     * @apiName PostResetPassword
+     * @apiGroup Teacher
+     * @apiDescription Post a reset password request
+     *
+     * @apiParam {String} login User email
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *
+     */
+        .post([
+            bodyParser.json(),
+            function (req, res, next) {
+                var login = req.body.login;
+
+                if (!login) return res.shortResponses.badRequest({ clientError: 'Missing login.' });
+                models.Teacher.findOne({ login: login }, function(err, teacher) {
+                    if (err) return next(err);
+                    if (!teacher) return res.shortResponses.notFound({ clientError: 'No such login.' });
+                    teacher.generateResetToken();
+                    mandrill.lostPassword(teacher.login, teacher.fullName, teacher.resetToken);
+                    teacher.save();
+                    res.shortResponses.ok();
                 });
             }
         ]);

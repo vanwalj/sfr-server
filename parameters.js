@@ -6,6 +6,10 @@ module.exports = {
     server: {
         port: process.env.PORT || 7070
     },
+    mandrill: {
+        apiKey: process.env.MANDRILL_APIKEY,
+        username: process.env.MANDRILL_USERNAME
+    },
     mongodb: {
         host: process.env.MONGOLAB_URI || process.env.MONGO_DB || process.env.TRAVIS_DATABASE_URL || 'mongodb://localhost/sfr'
     },
