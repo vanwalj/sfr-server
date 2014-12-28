@@ -11,6 +11,7 @@ var express     = require('express'),
 module.exports = function (app) {
     var router = express.Router();
 
+
     /**
      * @api {get} /course/token Request a course bearer token
      * @apiVersion 0.1.0
