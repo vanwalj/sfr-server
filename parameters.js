@@ -31,5 +31,11 @@ module.exports = {
     },
     lostPassword: {
         resetUrl: 'http://google.fr/'
+    },
+    notificationServices: {
+        apn: {
+            key: '',
+            cert: ''
+        }
     }
 };

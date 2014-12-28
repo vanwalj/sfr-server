@@ -38,8 +38,7 @@ fs.readdirSync(__dirname).filter(function(el) {
         require(__dirname + '/' + el)(app);
     }
     catch (e) {
-        console.log('Error loading route ' + el);
-        console.log(e);
+        winston.error('Error loading route ' + el, e);
     }
 });
 

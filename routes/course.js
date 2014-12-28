@@ -6,6 +6,8 @@ var express     = require('express'),
     passport    = require('passport'),
     winston     = require('winston'),
     bodyParser  = require('body-parser'),
+    _           = require('lodash'),
+    AWS         = require('aws-sdk'),
     s3          = new AWS.S3(),
     parameters  = require('../parameters'),
     mandrill    = require('../utils/mandrill'),
@@ -242,13 +244,46 @@ module.exports = function (app) {
             }
         ]);
 
-    router.route('/notifications')
+    router.route('/notification')
+    /**
+     * @api {post} /course/notifications Post a notification request
+     * @apiVersion 0.1.0
+     * @apiName PostNotificationRequest
+     * @apiGroup Course
+     * @apiDescription Post a the device platform and token to register for notifications
+     *
+     * @apiParam {String} token The device token
+     * @apiParam {String} platform The device platform
+     *
+     * @apiSuccessExample Success-Response:
+     *      HTTP/1.1 200 OK
+     *
+     */
         .post([
             passport.authenticate('course-bearer', {session : false}),
             bodyParser.json(),
             function (req, res, next) {
-                if (!req.body.deviceToken || !req.body.platform) return res.shortResponses.badRequest({ clientError: "Missing deviceToken or platform" });
-
+                if (!req.body.token || !req.body.platform) return res.shortResponses.badRequest({ clientError: "Missing deviceToken or platform" });
+                models.Device.findOne({ platform: req.body.platform, token: req.body.token }, function (err, device) {
+                    if (err) return next(err);
+                    if (device) {
+                        if (!_.contains(req.user.registeredDevices, device.id)) {
+                            req.user.registeredDevices.push(device.id);
+                            req.user.save();
+                        }
+                        return res.shortResponses.ok();
+                    } else {
+                        new models.Device({
+                                platform: req.body.platform,
+                                token: req.body.token
+                            }).save(function (err, device) {
+                                if (err) return next(err);
+                                req.user.registeredDevices.push(device.id);
+                                req.user.save();
+                                return res.shortResponses.ok();
+                        });
+                    }
+                });
             }
         ]);
 
