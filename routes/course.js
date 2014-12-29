@@ -86,27 +86,21 @@ module.exports = function (app) {
         .get([
             passport.authenticate('course-bearer', {session : false}),
             function (req, res, next) {
-                models.File.find({
-                    course: req.user.id,
-                    valid: true,
-                    published: true
-                }, function (err, files) {
-                    var content = [];
-                    files.forEach(function (file) {
-                        content.push({
-                            id: file._id,
-                            path: file.path,
-                            fileName: file.fileName,
-                            type: file.type,
-                            contentLength: file.contentLength,
-                            publishedAt: file.publishedAt
-                        });
-                    });
+                models.File
+                    .find({
+                        course: req.user.id,
+                        valid: true,
+                        published: true
+                    })
+                    .select('id path fileName type contentLength publishedAt')
+                    .exec(function (files) {
                     res.shortResponses.ok({
                         id: req.user.id,
                         name: req.user.name,
-                        content: content
+                        content: files
                     });
+                }, function (err) {
+                    if (err) return next(err);
                 });
             }
         ]);
@@ -253,7 +247,7 @@ module.exports = function (app) {
      * @apiDescription Post a the device platform and token to register for notifications
      *
      * @apiParam {String} token The device token
-     * @apiParam {String} platform The device platform
+     * @apiParam {String} platform The device platform ios|android
      *
      * @apiSuccessExample Success-Response:
      *      HTTP/1.1 200 OK
