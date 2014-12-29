@@ -272,20 +272,15 @@ module.exports = function (app) {
         .get([
             passport.authenticate('teacher-bearer', {session: false}),
             function (req, res, next) {
-                models.Course.find({
-                    teacher: req.user.id
-                }, function (err, courses) {
-                    if (err) return next(err);
-                    var content = [];
-                    courses.forEach(function (course) {
-                        content.push({
-                            id: course._id,
-                            name: course.name,
-                            login: course.login
-                        });
+                models.Course
+                    .find({ teacher: req.user.id })
+                    .select('id name login')
+                    .exec()
+                    .then(function (courses) {
+                        res.shortResponses.ok({ content: courses });
+                    }, function (err) {
+                        if (err) return next(err);
                     });
-                    res.shortResponses.ok({ content: content });
-                });
             }
         ]);
 

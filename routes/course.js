@@ -93,15 +93,16 @@ module.exports = function (app) {
                         published: true
                     })
                     .select('id path fileName type contentLength publishedAt')
-                    .exec(function (files) {
-                    res.shortResponses.ok({
-                        id: req.user.id,
-                        name: req.user.name,
-                        content: files
+                    .exec()
+                    .then(function (files) {
+                        res.shortResponses.ok({
+                            id: req.user.id,
+                            name: req.user.name,
+                            content: files
+                        });
+                    }, function (err) {
+                        if (err) return next(err);
                     });
-                }, function (err) {
-                    if (err) return next(err);
-                });
             }
         ]);
 
@@ -268,14 +269,14 @@ module.exports = function (app) {
                         return res.shortResponses.ok();
                     } else {
                         new models.Device({
-                                platform: req.body.platform,
-                                token: req.body.token
-                            }).save(function (err, device) {
+                            platform: req.body.platform,
+                            token: req.body.token
+                        }).save(function (err, device) {
                                 if (err) return next(err);
                                 req.user.registeredDevices.push(device.id);
                                 req.user.save();
                                 return res.shortResponses.ok();
-                        });
+                            });
                     }
                 });
             }
