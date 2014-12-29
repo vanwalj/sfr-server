@@ -262,9 +262,9 @@ module.exports = function (app) {
      *      HTTP/1.1 200 OK
      *      {
      *        "content": [
-     *          { id: '5fi4m456445adwwd', name: 'Bio PG' },
-     *          { id: 'dahjkdwa45456665', name: 'Bio UG1' }
-     *          { id: '98dihuwa56645654', name: 'Maths' }
+     *          { _id: '5fi4m456445adwwd', name: 'Bio PG' },
+     *          { _id: 'dahjkdwa45456665', name: 'Bio UG1' }
+     *          { _id: '98dihuwa56645654', name: 'Maths' }
      *        ]
      *      }
      *
@@ -274,12 +274,12 @@ module.exports = function (app) {
             function (req, res, next) {
                 models.Course
                     .find({ teacher: req.user.id })
-                    .select('id name login')
+                    .select('_id name login')
                     .exec()
                     .then(function (courses) {
                         res.shortResponses.ok({ content: courses });
                     }, function (err) {
-                        if (err) return next(err);
+                        next(err);
                     });
             }
         ]);
@@ -303,14 +303,15 @@ module.exports = function (app) {
      * @apiSuccessExample {json} Success-Response:
      *      HTTP/1.1 200 OK
      *      {
+     *        "_id": "dawdawdwaq4112123"
      *        "name": "Bio",
      *        "content": [
-     *          { id: '5fi4m456445adwwd', path: '/bio/s1', filename: 'week 1.pdf', type: 'application/pdf', contentLength: 456465 },
-     *          { id: 'dlk56456445adwwd', path: '/bio', filename: 'introduction.pdf', type: 'application/pdf', contentLength: 456465 },
-     *          { id: 'gfa56456445adwwd', path: '/bio/s2', filename: 'graph.jpg', type: 'image/jpeg', contentLength: 1235 },
-     *          { id: 'dbv56459945adwwd', path: '/bio/s3', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
-     *          { id: 'wqa56456445adwwd', path: '/bio', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
-     *          { id: 'xza56456445adwwd', path: '/bio/s1', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 }
+     *          { _id: '5fi4m456445adwwd', path: '/bio/s1', filename: 'week 1.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { _id: 'dlk56456445adwwd', path: '/bio', filename: 'introduction.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { _id: 'gfa56456445adwwd', path: '/bio/s2', filename: 'graph.jpg', type: 'image/jpeg', contentLength: 1235 },
+     *          { _id: 'dbv56459945adwwd', path: '/bio/s3', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { _id: 'wqa56456445adwwd', path: '/bio', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 },
+     *          { _id: 'xza56456445adwwd', path: '/bio/s1', filename: 'week 10.pdf', type: 'application/pdf', contentLength: 456465 }
      *        ]
      *      }
      *
@@ -322,31 +323,22 @@ module.exports = function (app) {
                 next();
             },
             function (req, res, next) {
-                models.File.find({
-                    course: req.course.id,
-                    valid: true
-                }, function (err, files) {
-                    if (err) return next(err);
-                    var response = {
-                        course: {
-                            id: req.course.id,
+                models.File
+                    .find({
+                        course: req.course.id,
+                        valid: true
+                    })
+                    .select('_id path fileName type contentLength createdAt publishedAt')
+                    .exec()
+                    .find(function (files) {
+                        res.shortResponses.ok({
+                            _id: req.course.id,
                             name: req.course.name,
-                            content: []
-                        }
-                    };
-                    files.forEach(function (file) {
-                        response.course.content.push({
-                            id: file._id,
-                            path: file.path,
-                            fileName: file.fileName,
-                            type: file.type,
-                            contentLength: file.contentLength,
-                            createdAt: file.createdAt,
-                            publishedAt: file.publishedAt
+                            content: files
                         });
+                    }, function (err) {
+                        next (err);
                     });
-                    res.shortResponses.ok(response);
-                });
             }
         ])
     /**
