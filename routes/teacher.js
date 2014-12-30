@@ -240,7 +240,7 @@ module.exports = function (app) {
                 course.save(function (err) {
                     if (err && err.code == 11000) return res.shortResponses.conflict();
                     if (err) return next(err);
-                    return res.shortResponses.created({ courseId: course.id });
+                    return res.shortResponses.created({ _id: course.id });
                 });
 
             }
@@ -480,7 +480,7 @@ module.exports = function (app) {
                             Expires: 60
                         }, function (err, url) {
                             if (err) return next(err);
-                            res.shortResponses.created({ url: url, id: file.id });
+                            res.shortResponses.created({ url: url, _id: file.id });
                         });
                     });
 
@@ -606,14 +606,19 @@ module.exports = function (app) {
                 var login = req.body.login;
 
                 if (!login) return res.shortResponses.badRequest({ clientError: 'Missing login.' });
-                models.Teacher.findOne({ login: login }, function(err, teacher) {
-                    if (err) return next(err);
-                    if (!teacher) return res.shortResponses.notFound({ clientError: 'No such login.' });
-                    teacher.generateResetToken();
-                    mandrill.lostPassword(teacher.login, teacher.fullName, teacher.resetUrl);
-                    teacher.save();
-                    res.shortResponses.ok();
-                });
+                models.Teacher
+                    .findOne({ login: login })
+                    .select('login fullName resetUrl')
+                    .exec()
+                    .then(function(teacher) {
+                        if (!teacher) return res.shortResponses.notFound({ clientError: 'No such login.' });
+                        teacher.generateResetToken();
+                        mandrill.lostPassword(teacher.login, teacher.fullName, teacher.resetUrl);
+                        teacher.save();
+                        res.shortResponses.ok();
+                    }, function (err) {
+                        next(err);
+                    });
             }
         ])
     /**

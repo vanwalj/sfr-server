@@ -96,7 +96,7 @@ module.exports = function (app) {
                     .exec()
                     .then(function (files) {
                         res.shortResponses.ok({
-                            id: req.user.id,
+                            _id: req.user.id,
                             name: req.user.name,
                             content: files
                         });
