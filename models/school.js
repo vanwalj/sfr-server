@@ -5,8 +5,7 @@
 var models      = require('./index'),
     winston     = require('winston'),
     bcrypt      = require('bcryptjs'),
-    massAssign  = require('mongoose-mass-assign'),
-    parameters  = require('../parameters');
+    massAssign  = require('mongoose-mass-assign');
 
 module.exports = function (mongoose) {
     var schoolSchema = mongoose.Schema({
