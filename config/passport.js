@@ -7,6 +7,42 @@ var passport = require('passport'),
     BasicStrategy = require('passport-http').BasicStrategy,
     models = require('./../models/index');
 
+passport.use('school-bearer', new BearerStrategy(
+    function (bearer, done) {
+
+        models.SchoolToken.findOne({
+            value: bearer
+        }, function (err, schoolToken) {
+            if (err) return done(err);
+            if (!schoolToken) return done(null, false);
+            models.School.findOne({
+                _id: schoolToken.teacher
+            }, function (err, school) {
+                if (err) return done(err);
+                if (!school) return done(null, false);
+                return done(null, school, { scope: 'all' });
+            });
+        });
+    }
+));
+
+passport.use('school-basic', new BasicStrategy(
+    function (login, password, done) {
+        models.School.findOne({
+            login: login
+        }, function (err, school) {
+            if (err) return done(err);
+            if (!school) return done(null, false);
+            school.validPassword(password, function (err, login) {
+                if (err) return done(err);
+                if (!login) return done(null, false);
+                return done(null, school);
+            });
+        });
+    }
+));
+
+
 passport.use('teacher-bearer', new BearerStrategy(
     function (bearer, done) {
 

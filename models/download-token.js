@@ -2,7 +2,8 @@
  * Created by Jordan on 28/12/14.
  */
 
-var parameters = require('../parameters');
+var parameters = require('../parameters'),
+    hat         = require('hat');
 
 module.exports = function (mongoose) {
 

@@ -4,6 +4,7 @@
 
 var bcrypt      = require('bcryptjs'),
     hat         = require('hat'),
+    massAssign  = require('mongoose-mass-assign'),
     parameters  = require('../parameters'),
     models      = require('./index');
 
@@ -13,11 +14,12 @@ module.exports = function (mongoose) {
         password: { type: String, required: true },
         name: {
             first: { type: String },
-            last: { type: String },
+            last: { type: String, required: true },
             title: { type: String }
         },
         picture: { type: String },
-        resetToken: { type: String }
+        resetToken: { type: String, protect: true },
+        school: { type: mongoose.Schema.Types.ObjectId, ref: 'School', required: true, protect: true }
     });
 
     teacherSchema.virtual('fullName').get(function () {
@@ -60,13 +62,20 @@ module.exports = function (mongoose) {
                 cb(err, res);
             });
         },
-        generateToken: function (cb) {
-            models.TeacherToken.generateTokenForTeacher(this, cb);
-        },
         generateResetToken: function () {
             this.resetToken = hat();
         }
     };
+
+    teacherSchema.set('toJSON', {
+        transform: function (doc, ret, options) {
+            delete ret.password;
+            delete ret.resetToken;
+            return ret;
+        }
+    });
+
+    teacherSchema.plugin(massAssign);
 
     return mongoose.model('Teacher', teacherSchema);
 };

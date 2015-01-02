@@ -37,77 +37,6 @@ module.exports = function (app) {
 
     router.route('/')
     /**
-     * @api {post} /teacher Post a new teacher account
-     * @apiVersion 0.1.0
-     * @apiName PostTeacher
-     * @apiGroup Teacher
-     * @apiDescription Register a new teacher
-     *
-     * @apiParam {String} login New teacher login
-     * @apiParam {String} password New teacher password
-     * @apiParam {String} [firstName]
-     * @apiParam {String} [lastName]
-     * @apiParam {String} [title]
-     * @apiParam {Buffer} [picture]
-     *
-     * @apiSuccessExample Success-Response
-     *      HTTP/1.1 200 OK
-     *
-     */
-        .post([
-            bodyParser.json(),
-            function (req, res, next) {
-                if (!req.body.login || !req.body.password) {
-                    winston.log('info', 'Register attempt without enough info.', req.body);
-                    return res.shortResponses.badRequest({ clientError: "Missing login or password." });
-                }
-                var teacher = new models.Teacher({
-                    login: req.body.login,
-                    password: req.body.password,
-                    name: {
-                        first: req.body.firstName,
-                        last: req.body.lastName,
-                        title: req.body.title
-                    },
-                    picture: req.body.picture
-                });
-                teacher.save(function (err, teacher) {
-                    if (err && err.code == 11000) return res.shortResponses.conflict({ clientError: 'Login already exist.' });
-                    if (err) return next(err);
-                    if (!teacher) return next(new Error('Unable to register a new teacher.'));
-                    winston.log('info', 'New teacher !', teacher.toJSON());
-                    return res.shortResponses.ok();
-                });
-            }
-        ])
-    /**
-     * @api {delete} /teacher Delete a teacher account
-     * @apiVersion 0.1.0
-     * @apiName DeleteTeacher
-     * @apiGroup Teacher
-     * @apiDescription Delete the current teacher account and all related courses/files
-     *
-     * @apiHeader {String} Authorization basic access authentication (see: http://en.wikipedia.org/wiki/Basic_access_authentication#Client_side)
-     * @apiHeaderExample {json} Header-Example:
-     *      {
-     *        "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
-     *      }
-     *
-     * @apiSuccessExample Success-Response
-     *      HTTP/1.1 200 OK
-     *
-     */
-        .delete([
-            passport.authenticate('teacher-basic', {session: false}),
-            function (req, res, next) {
-                req.user.remove(function (err, teacher) {
-                    if (err) return next(err);
-                    winston.log('info', 'Teacher account deleted', teacher);
-                    res.shortResponses.ok();
-                })
-            }
-        ])
-    /**
      * @api {get} /teacher Get teacher account details
      * @apiVersion 0.1.0
      * @apiName GetTeacher
@@ -166,12 +95,13 @@ module.exports = function (app) {
         .get([
             passport.authenticate('teacher-basic', {session: false}),
             function (req, res, next) {
-                req.user.generateToken(function (err, teacherToken) {
-                    if (err) return next(err);
-                    if (!teacherToken) return next(new Error('Unable to generate a teacher token.'));
-                    winston.log('info', 'New teacher token !', { user: req.user.toJSON(), token: teacherToken.toJSON() });
-                    return res.shortResponses.ok({ Bearer: teacherToken.value });
-                });
+                new models.TeacherToken({ teacher: req.user.id })
+                    .save(function (err, teacherToken) {
+                        if (err) return next(err);
+                        if (!teacherToken) return next(new Error('Unable to generate a teacher token.'));
+                        winston.log('info', 'New teacher token !', { user: req.user.toJSON(), token: teacherToken.toJSON() });
+                        return res.shortResponses.ok({ Bearer: teacherToken.value });
+                    });
             }
         ])
     /**

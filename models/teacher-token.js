@@ -7,16 +7,9 @@ var hat = require('hat');
 module.exports = function (mongoose) {
 
     var teacherTokenSchema = mongoose.Schema({
-        value: {type: String, required: true },
+        value: {type: String, required: true, default: hat() },
         teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true }
     });
-
-    teacherTokenSchema.statics.generateTokenForTeacher = function(teacher, cb) {
-        var TeacherToken = this;
-
-        var teacherToken = new TeacherToken({ teacher: teacher.id, value: hat() });
-        teacherToken.save(cb);
-    };
 
     return mongoose.model('TeacherToken', teacherTokenSchema);
 };

@@ -4,6 +4,7 @@
 
 var models      = require('./index'),
     winston     = require('winston'),
+    massAssing  = require('mongoose-mass-assign'),
     parameters  = require('../parameters');
 
 module.exports = function (mongoose) {
@@ -23,11 +24,7 @@ module.exports = function (mongoose) {
         });
     });
 
-    courseSchema.methods = {
-        generateToken: function (cb) {
-            models.CourseToken.generateTokenForCourse(this, cb);
-        }
-    };
+    courseSchema.plugin(massAssing);
 
     return mongoose.model('Course', courseSchema);
 };

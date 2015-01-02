@@ -51,12 +51,13 @@ module.exports = function (app) {
                     });
             },
             function (req, res, next) {
-                req.user.generateToken(function (err, courseToken) {
-                    if (err) return next(err);
-                    if (!courseToken) return next(new Error('Unable to generate a course token.'));
-                    winston.log('info', 'New course token !', { user: req.user.toJSON(), token: courseToken.toJSON() });
-                    return res.shortResponses.ok({ Bearer: courseToken.value });
-                });
+                new models.CourseToken({ course: req.course.id })
+                    .save(function (err, courseToken) {
+                        if (err) return next(err);
+                        if (!courseToken) return next(new Error('Unable to generate a course token.'));
+                        winston.log('info', 'New course token !', { user: req.user.toJSON(), token: courseToken.toJSON() });
+                        return res.shortResponses.ok({ Bearer: courseToken.value });
+                    });
             }
         ]);
 
