@@ -3,10 +3,7 @@
  */
 
 module.exports = function (mongoose) {
-    var schoolSchema = mongoose.Schema({
-        login: { type: String, unique: true },
-        password: { type: String }
-    });
+    var schoolSchema = mongoose.Schema();
 
     return mongoose.model('School', schoolSchema);
 };
