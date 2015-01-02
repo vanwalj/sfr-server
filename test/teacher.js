@@ -302,8 +302,8 @@ describe('Teacher', function () {
                 body: course
             }, function (err, res, body) {
                 expect(res.statusCode).to.equal(201);
-                expect(body.courseId).to.have.length(24);
-                courseId = body.courseId;
+                expect(body._id).to.have.length(24);
+                courseId = body._id;
                 done();
             });
         });
