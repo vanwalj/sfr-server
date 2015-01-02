@@ -13,29 +13,8 @@ module.exports = function (mongoose) {
         password: { type: String }
     });
 
-    schoolSchema.plugin(massAssign);
-
-    schoolSchema.methods = {
-        validPassword: function (password, cb) {
-            bcrypt.compare(password, this.password, function (err, res) {
-                cb(err, res);
-            });
-        }
-    };
 
 
-    schoolSchema.post('remove', function (school) {
-        models.Teacher.remove({ school: school._id }, function (err) {
-            if (err) winston.error(err);
-        });
-    });
-
-    schoolSchema.set('toJSON', {
-        transform: function (doc, ret, options) {
-            delete ret.password;
-            return ret;
-        }
-    });
 
     return mongoose.model('School', schoolSchema);
 };
