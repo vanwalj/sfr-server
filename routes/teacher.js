@@ -64,9 +64,11 @@ module.exports = function (app) {
                 var teacher = new models.Teacher({
                     login: req.body.login,
                     password: req.body.password,
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    title: req.body.title,
+                    name: {
+                        first: req.body.firstName,
+                        last: req.body.lastName,
+                        title: req.body.title
+                    },
                     picture: req.body.picture
                 });
                 teacher.save(function (err, teacher) {
@@ -134,9 +136,7 @@ module.exports = function (app) {
             function (req, res, next) {
                 res.shortResponses.ok({
                     login: req.user.login,
-                    firstName: req.user.firstName,
-                    lastName: req.user.lastName,
-                    title: req.user.title,
+                    name: req.user.name,
                     picture: req.user.picture
                 });
             }
@@ -212,8 +212,7 @@ module.exports = function (app) {
      * @apiGroup Teacher
      * @apiDescription Post a new course and set name and student login/password to access to this course
      *
-     * @apiParam {String} login New course login
-     * @apiParam {String} password New course password
+     * @apiParam {String} code New course code
      * @apiParam {String} name New course name
      *
      * @apiSuccessExample Success-Response
@@ -227,13 +226,12 @@ module.exports = function (app) {
             passport.authenticate('teacher-bearer', {session: false}),
             bodyParser.json(),
             function (req, res, next) {
-                if (!req.body.name || !req.body.login || !req.body.password)
-                    return res.shortResponses.badRequest( {clientError: 'name, login or password not specified'} );
+                if (!req.body.name || !req.body.code)
+                    return res.shortResponses.badRequest( {clientError: 'name or code not specified'} );
 
                 var course = new models.Course({
-                    login: req.body.login,
+                    code: req.body.code,
                     name: req.body.name,
-                    password: req.body.password,
                     teacher: req.user._id
                 });
 

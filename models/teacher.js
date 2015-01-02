@@ -11,18 +11,20 @@ module.exports = function (mongoose) {
     var teacherSchema = mongoose.Schema({
         login: { type: String, required: true, unique: true },
         password: { type: String, required: true },
-        firstName: { type: String },
-        lastName: { type: String },
-        title: { type: String },
-        picture: { type: Buffer },
+        name: {
+            first: { type: String },
+            last: { type: String },
+            title: { type: String }
+        },
+        picture: { type: String },
         resetToken: { type: String }
     });
 
     teacherSchema.virtual('fullName').get(function () {
         var fullName = "";
-        if (this.title) fullName += this.title + " ";
-        if (this.firstName) fullName += this.firstName + " ";
-        if (this.lastName) fullName += this.lastName;
+        if (this.name.title) fullName += this.name.title + " ";
+        if (this.name.first) fullName += this.name.first + " ";
+        if (this.name.last) fullName += this.name.last;
         if (fullName.length > 0 && fullName[fullName.length - 1] == " ") fullName = fullName.substring(0, fullName.length - 1);
         return fullName;
     });

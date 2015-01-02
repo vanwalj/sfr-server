@@ -59,19 +59,3 @@ passport.use('course-bearer', new BearerStrategy(
         });
     }
 ));
-
-passport.use('course-basic', new BasicStrategy(
-    function (login, password, done) {
-        models.Course.findOne({
-            login: login
-        }, function (err, course) {
-            if (err) return done(err);
-            if (!course) return done(null, false);
-            course.validPassword(password, function (err, login) {
-                if (err) return done(err);
-                if (!login) return done(null, false);
-                return done(null, course);
-            });
-        });
-    }
-));

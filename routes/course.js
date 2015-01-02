@@ -23,11 +23,7 @@ module.exports = function (app) {
      * @apiGroup Course
      * @apiDescription Get a bearer token, so then you can auth subsequent requests.
      *
-     * @apiHeader {String} Authorization basic access authentication (see: http://en.wikipedia.org/wiki/Basic_access_authentication#Client_side)
-     * @apiHeaderExample {json} Header-Example:
-     *     {
-     *       "Authorization": "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
-     *     }
+     * @apiParam {String} courseCode The requested course code
      * @apiSuccess {String} Bearer The course bearer token.
      *
      * @apiSuccessExample {json} Success-Response:
@@ -40,7 +36,20 @@ module.exports = function (app) {
      */
     router.route('/token')
         .get([
-            passport.authenticate('course-basic', {session: false}),
+            bodyParser.json(),
+            function (req, res, next) {
+                if (!req.body.courseCode) return res.shortResponses.badRequest({clientError: "Course code not provided."});
+                models.course
+                    .findOne({code: req.body.courseCode})
+                    .exec()
+                    .then(function (course) {
+                        if (!course) return req.shortResponses.notFound({ notFound: "Course not found" });
+                        req.course = course;
+                        next();
+                    }, function (err) {
+                        next(err);
+                    });
+            },
             function (req, res, next) {
                 req.user.generateToken(function (err, courseToken) {
                     if (err) return next(err);
@@ -70,6 +79,14 @@ module.exports = function (app) {
      *      HTTP/1.1 200 OK
      *      {
      *        "name": "Bio",
+     *        "teacher": {
+     *          name: {
+     *            first: "John",
+     *            last: "Doe",
+     *            title: "Mr."
+     *          },
+     *          picture: "base64string"
+     *        },
      *        "content": [
      *          { _id: '5fi4m456445adwwd', path: '/bio/s1', filename: 'week 1.pdf', type: 'application/pdf', contentLength: 456465 },
      *          { _id: 'dlk56456445adwwd', path: '/bio', filename: 'introduction.pdf', type: 'application/pdf', contentLength: 456465 },
@@ -211,7 +228,6 @@ module.exports = function (app) {
             bodyParser.json(),
             function (req, res, next) {
                 if (!req.body.token) return res.shortResponses.badRequest({ clientError: 'Missing token.' });
-
                 models.DownloadToken.findOne({ value: req.body.token }, function (err, downloadToken) {
                     if (err) return next(err);
                     if (!downloadToken) return res.shortResponses.badRequest({ clientError: "No such token." });

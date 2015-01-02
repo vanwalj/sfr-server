@@ -228,8 +228,7 @@ describe('Teacher', function () {
         var bearerUrl = host + route + '/token';
         var course = {
             name: 'bio',
-            login: 'bio',
-            password: 'bio'
+            code: 'bio'
         };
         var courseId = null;
 
