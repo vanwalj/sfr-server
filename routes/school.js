@@ -4,6 +4,7 @@
 
 var express = require('express'),
     bodyParser = require('body-parser'),
+    passport = require('passport'),
     models = require('../models');
 
 module.exports = function (app) {
