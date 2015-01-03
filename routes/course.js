@@ -37,6 +37,7 @@ module.exports = function (app) {
     router.route('/token')
         .post([
             bodyParser.json(),
+            bodyParser.urlencoded({ extended: false }),
             function (req, res, next) {
                 if (!req.body.courseCode) return res.shortResponses.badRequest({clientError: "Course code not provided."});
                 models.course
@@ -227,6 +228,7 @@ module.exports = function (app) {
      */
         .post([
             bodyParser.json(),
+            bodyParser.urlencoded({ extended: false }),
             function (req, res, next) {
                 if (!req.body.token) return res.shortResponses.badRequest({ clientError: 'Missing token.' });
                 models.DownloadToken.findOne({ value: req.body.token }, function (err, downloadToken) {
@@ -274,6 +276,7 @@ module.exports = function (app) {
         .post([
             passport.authenticate('course-bearer', {session : false}),
             bodyParser.json(),
+            bodyParser.urlencoded({ extended: false }),
             function (req, res, next) {
                 if (!req.body.token || !req.body.platform) return res.shortResponses.badRequest({ clientError: "Missing deviceToken or platform" });
                 models.Device.findOne({ platform: req.body.platform, token: req.body.token }, function (err, device) {
