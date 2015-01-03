@@ -17,9 +17,9 @@ module.exports = function (app) {
     var router = express.Router();
 
     /**
-     * @api {get} /course/token Request a course bearer token
+     * @api {post} /course/token Request a course bearer token
      * @apiVersion 0.1.0
-     * @apiName GetCourseToken
+     * @apiName PostCourseToken
      * @apiGroup Course
      * @apiDescription Get a bearer token, so then you can auth subsequent requests.
      *
@@ -35,7 +35,7 @@ module.exports = function (app) {
      * @apiError Unauthorized Wrong credentials
      */
     router.route('/token')
-        .get([
+        .post([
             bodyParser.json(),
             function (req, res, next) {
                 if (!req.body.courseCode) return res.shortResponses.badRequest({clientError: "Course code not provided."});
